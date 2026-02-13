@@ -1,111 +1,94 @@
 # PROOF OF PLAY
 
-## A Protocol-First Reference Implementation for Fully On-Chain Gaming on Solana
+## Games Don’t Need Servers
 
-Proof of Play is not a game demo.
-It is a protocol reference.
+Proof of Play is not a game.
+It is a proof.
 
-This repository demonstrates — in the smallest, most explicit form possible — how real gameplay can be executed, verified, and persisted entirely on-chain without servers, databases, or trusted intermediaries.
+This repository demonstrates that real gameplay can run entirely on-chain — without backend servers, without databases, and without trusted intermediaries.
 
-The included “Dungeon” exists only as a visualizer.
-The architecture is the product.
+Every action is a transaction.
+Every state change lives on Solana.
+Everything is verifiable.
 
-Built for the Play Solana ecosystem (PSG1-first).
+The “Dungeon” is intentionally minimal.
+It exists only to make the system observable.
 
-## 🧠 WHY THIS EXISTS
+Built PSG1-first for Play Solana.
 
-Most “on-chain games” today are still Web2 games with wallet login.
+## THE CLAIM
 
-They rely on:
-- Backend servers
-- Private databases
-- Hidden game logic
-- Trust assumptions
+Most on-chain games are still Web2 games with a wallet attached.
 
-Proof of Play removes all of that.
+Proof of Play removes the Web2.
 
-No backend.
-No database.
-No off-chain logic.
+- No backend
+- No database
+- No off-chain logic
+- No hidden state
 
-Every action is a Solana transaction.
-Every state change lives in a PDA.
-Every result is verifiable on-chain.
+The blockchain is the game engine.
 
-## ⚙️ WHAT MAKES THIS DIFFERENT
-
-This project does not compete on graphics.
-It competes on architecture.
-
-Proof of Play treats the blockchain as the game engine, not a settlement layer.
-
-| Feature | Typical Hackathon Game | Proof of Play |
-| :--- | :--- | :--- |
-| **Backend** | Required | ❌ None |
-| **Database** | Required | ❌ None |
-| **Game Logic** | Server-side | ✅ On-chain (Anchor) |
-| **State** | Private | ✅ Public PDAs |
-| **Verifiability** | Limited | ✅ Solana Explorer |
-| **Censorship Resistance** | ❌ | ✅ By design |
+## WHAT THIS PROVES
 
 If the frontend disappears, the game still exists.
 
-## 🏗️ ARCHITECTURE (SINGLE SOURCE OF TRUTH)
-
-- **Anchor Program** — all game logic
-- **Player PDA** — all persistent state
-- **Metaplex NFTs** — functional equipment (not images)
-- **Jupiter** — trustless reward swaps
-- **Next.js (Vercel)** — static UI only
+- Game logic lives in an **Anchor program**
+- State lives in **PDAs**
+- Equipment is **Metaplex metadata**
+- Rewards are **Jupiter swaps**
 
 No servers.
 No APIs.
-No cron jobs.
+No trust assumptions.
 
-## 🎮 ON-CHAIN GAME LOOP
+## THE LOOP (ON-CHAIN)
 
-1. **Init Player** → PDA created on Solana
-2. **Equip NFT** → Metadata modifies stats
-3. **Explore** → On-chain RNG generates event hash
-4. **Fight** → Combat computed in Rust (Anchor)
-5. **Claim** → Jupiter swap executes reward
+**Init → Explore → Fight → Claim**
 
-Every step is a blockchain transaction.
+Each step:
 
-## 📱 WHY PSG1-FIRST
+1. Executes on Solana
+2. Produces a transaction
+3. Can be inspected on Explorer
 
-- Portrait-first layout
+This is gameplay as a public system.
+
+## WHY PSG1-FIRST
+
+Handheld devices need simple, deterministic systems.
+
+- Portrait-first
 - Large touch targets
 - Stateless frontend
-- Short, repeatable sessions
-- Designed for handheld-native play
+- Short sessions
+- Immediate feedback
 
 This is what blockchain-native gaming looks like on mobile hardware.
 
-## ⏱️ 60-SECOND DEMO REALITY
+## THE DIFFERENCE
 
-1. Open the app
-2. Connect wallet
-3. Initialize player (PDA creation)
-4. Explore (on-chain RNG)
-5. Fight (on-chain combat)
-6. Claim (Jupiter swap)
+| Feature | Typical Hackathon Game | Proof of Play |
+| :--- | :--- | :--- |
+| **Backend** | Required | **None** |
+| **Database** | Required | **None** |
+| **Game Logic** | Server-side | **On-chain** |
+| **State** | Private | **Public** |
+| **Verifiability** | Limited | **Absolute** |
 
-Each step produces a transaction you can inspect on Solana Explorer.
+This does not compete on graphics.
+It competes on truth.
 
-## 🎯 THE POINT
+## THE POINT
 
-Proof of Play proves that:
+Games can be fully on-chain.
+State does not require databases.
+Logic does not require servers.
 
-- Games can run fully on-chain
-- State does not require databases
-- Logic does not require servers
-- Transparency is a feature, not a tradeoff
+Transparency is not a feature.
+It is the default.
 
-This is not a toy.
-This is a reference.
-
-## 🧨 CLOSING
+## CLOSING
 
 Proof of Play is not about how games look.
 It’s about what games are allowed to be.

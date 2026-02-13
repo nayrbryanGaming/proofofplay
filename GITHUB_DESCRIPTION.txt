@@ -1,2 +1,2 @@
-Protocol-first, fully on-chain gaming reference implementation on Solana.
-No backend. No database. Every action is a verifiable transaction. Built PSG1-first for Play Solana.
+A protocol-first proof that games can run entirely on-chain.
+No backend. No database. Every action is a Solana transaction. Built PSG1-first.
