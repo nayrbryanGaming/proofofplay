@@ -1,0 +1,29 @@
+{
+    "name": "Rusty Sword",
+    "symbol": "POP",
+    "description": "A rusty sword found in the Proof of Play Dungeon. It still has some edge.",
+    "image": "https://arweave.net/placeholder-image",
+    "attributes": [
+        {
+            "trait_type": "Type",
+            "value": "Weapon"
+        },
+        {
+            "trait_type": "ATK",
+            "value": "3"
+        },
+        {
+            "trait_type": "Rarity",
+            "value": "Common"
+        }
+    ],
+    "properties": {
+        "files": [
+            {
+                "uri": "https://arweave.net/placeholder-image",
+                "type": "image/png"
+            }
+        ],
+        "category": "image"
+    }
+}
