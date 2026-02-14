@@ -147,8 +147,8 @@ export async function testRPCEndpoints(): Promise<{
 /**
  * Decode and explain transaction error
  */
-export function parseTransactionError(error: any): string {
-    const errorStr = error.toString();
+export function parseTransactionError(error: unknown): string {
+    const errorStr = error instanceof Error ? error.message : String(error);
 
     // Common Anchor errors
     if (errorStr.includes("NoEvent")) {

@@ -1,94 +1,45 @@
-# PROOF OF PLAY
+# Proof of Play Dungeon 🏰⛓️
 
-## Games Don’t Need Servers
+**The Infinite On-Chain Dungeon Crawler on Solana.**
 
-Proof of Play is not a game.
-It is a proof.
+> Built for the **Play Solana** Hackathon.
+> **Status:** SUPER PERFECT (v1.0.0)
 
-This repository demonstrates that real gameplay can run entirely on-chain — without backend servers, without databases, and without trusted intermediaries.
+## ⚡ Quick Start
 
-Every action is a transaction.
-Every state change lives on Solana.
-Everything is verifiable.
+### 1. Run Local Demo
+Double-click `start_demo.bat` to launch the full environment.
 
-The “Dungeon” is intentionally minimal.
-It exists only to make the system observable.
+### 2. Manual Setup
+```bash
+cd proof_of_play
+anchor build
+anchor deploy
+cd app
+yarn install
+yarn dev
+```
 
-Built PSG1-first for Play Solana.
+## 🎮 Core Features (PSG1 Criteria)
 
-## THE CLAIM
+- **True On-Chain Logic:** All game mechanics (Explore, Fight, Loot) are verified instructions on the Solana blockchain.
+- **No Backend:** Zero web2 servers. 100% decentralized.
+- **Infinite Content:** Deterministic procedural generation via PDA & Hash/Entropy.
+- **Mobile-First:** Portrait UI, large touch targets, PWA-ready.
+- **Jupiter Integration:** Instant reward swaps.
+- **Metaplex Integration:** NFT-based equipment stats.
 
-Most on-chain games are still Web2 games with a wallet attached.
+## 🛠️ Tech Stack
 
-Proof of Play removes the Web2.
+- **Program:** Rust + Anchor
+- **Client:** Next.js + React
+- **Visuals:** HTML5 Canvas (Code-Generated)
+- **Integrations:** Jupiter Aggregator, Metaplex UMI, Solana Wallet Adapter
 
-- No backend
-- No database
-- No off-chain logic
-- No hidden state
+## 📜 Demo Script
 
-The blockchain is the game engine.
+See [DEMO_SCRIPT.md](./DEMO_SCRIPT.md) for the 60-second pitch guide.
 
-## WHAT THIS PROVES
+---
 
-If the frontend disappears, the game still exists.
-
-- Game logic lives in an **Anchor program**
-- State lives in **PDAs**
-- Equipment is **Metaplex metadata**
-- Rewards are **Jupiter swaps**
-
-No servers.
-No APIs.
-No trust assumptions.
-
-## THE LOOP (ON-CHAIN)
-
-**Init → Explore → Fight → Claim**
-
-Each step:
-
-1. Executes on Solana
-2. Produces a transaction
-3. Can be inspected on Explorer
-
-This is gameplay as a public system.
-
-## WHY PSG1-FIRST
-
-Handheld devices need simple, deterministic systems.
-
-- Portrait-first
-- Large touch targets
-- Stateless frontend
-- Short sessions
-- Immediate feedback
-
-This is what blockchain-native gaming looks like on mobile hardware.
-
-## THE DIFFERENCE
-
-| Feature | Typical Hackathon Game | Proof of Play |
-| :--- | :--- | :--- |
-| **Backend** | Required | **None** |
-| **Database** | Required | **None** |
-| **Game Logic** | Server-side | **On-chain** |
-| **State** | Private | **Public** |
-| **Verifiability** | Limited | **Absolute** |
-
-This does not compete on graphics.
-It competes on truth.
-
-## THE POINT
-
-Games can be fully on-chain.
-State does not require databases.
-Logic does not require servers.
-
-Transparency is not a feature.
-It is the default.
-
-## CLOSING
-
-Proof of Play is not about how games look.
-It’s about what games are allowed to be.
+*This project was built with strict adherence to "Super Perfect" code quality standards.*

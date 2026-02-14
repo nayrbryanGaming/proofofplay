@@ -49,73 +49,73 @@ export const DiagnosticPanel = () => {
         return (
             <button
                 onClick={() => setIsOpen(true)}
-                className="fixed bottom-4 right-4 bg-gray-900 border border-green-500 text-green-500 p-2 rounded-full hover:bg-green-900 transition-colors z-50 text-xs"
+                className="fixed bottom-4 right-4 bg-black border border-[#00ff41] text-[#00ff41] p-2 rounded-none hover:bg-[#00ff41] hover:text-black transition-colors z-50 text-xs font-mono tracking-wider psg1-glow"
                 title="System Diagnostics"
             >
-                📟 SYS
+                [ SYSTEM_DIAG ]
             </button>
         );
     }
 
     return (
-        <div className="fixed bottom-4 right-4 w-80 bg-black border border-green-500 p-4 rounded-lg shadow-2xl z-50 text-xs font-mono text-green-400 opacity-95">
-            <div className="flex justify-between items-center mb-4 border-b border-green-800 pb-2">
-                <h3 className="font-bold flex items-center">
-                    <span className="animate-pulse mr-2">●</span>
-                    SYSTEM DIAGNOSTICS
+        <div className="fixed bottom-4 right-4 w-80 bg-black/90 border-2 border-[#00ff41] p-4 shadow-[0_0_20px_rgba(0,255,65,0.2)] z-50 text-xs font-mono text-[#00ff41] backdrop-blur-sm">
+            <div className="flex justify-between items-center mb-4 border-b border-[#00ff41] pb-2">
+                <h3 className="font-bold flex items-center tracking-widest">
+                    <span className="animate-pulse mr-2 text-[#00ff41]">■</span>
+                    SYSTEM_STATUS
                 </h3>
                 <div className="flex gap-2">
-                    <button onClick={runDiagnostics} className="hover:text-white" disabled={loading}>
-                        {loading ? "..." : "↻"}
+                    <button onClick={runDiagnostics} className="hover:text-white hover:bg-[#00ff41] px-1" disabled={loading}>
+                        {loading ? "..." : "[R]"}
                     </button>
-                    <button onClick={() => setIsOpen(false)} className="hover:text-white">✕</button>
+                    <button onClick={() => setIsOpen(false)} className="hover:text-white hover:bg-[#00ff41] px-1">[X]</button>
                 </div>
             </div>
 
             {loading && !health ? (
-                <div className="text-center py-4">ANALYZING NETWORK...</div>
+                <div className="text-center py-4 animate-pulse">>> ANALYZING_NETWORK...</div>
             ) : (
-                <div className="space-y-4 max-h-96 overflow-y-auto">
+                <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
                     {/* Overall Status */}
-                    <div className={`text-center p-2 rounded ${health?.status === 'healthy' ? 'bg-green-900/30 text-green-300' :
-                            health?.status === 'warning' ? 'bg-yellow-900/30 text-yellow-300' :
-                                'bg-red-900/30 text-red-300'
+                    <div className={`text-center p-2 border ${health?.status === 'healthy' ? 'border-[#00ff41] text-[#00ff41] bg-[#00ff41]/10' :
+                        health?.status === 'warning' ? 'border-yellow-500 text-yellow-500 bg-yellow-900/20' :
+                            'border-red-500 text-red-500 bg-red-900/20'
                         }`}>
                         STATUS: {health?.status?.toUpperCase() || "UNKNOWN"}
                     </div>
 
                     {/* Component Checks */}
                     <div className="space-y-1">
-                        <div className="flex justify-between">
-                            <span>RPC Connection</span>
+                        <div className="flex justify-between border-b border-gray-800 pb-1">
+                            <span>RPC_CONN</span>
                             <span>{health?.checks.rpc ? "OK" : "ERR"}</span>
                         </div>
-                        <div className="flex justify-between">
-                            <span>Program ID</span>
+                        <div className="flex justify-between border-b border-gray-800 pb-1">
+                            <span>PROG_ID</span>
                             <span>{health?.checks.program ? "OK" : "ERR"}</span>
                         </div>
-                        <div className="flex justify-between">
-                            <span>Balance</span>
+                        <div className="flex justify-between border-b border-gray-800 pb-1">
+                            <span>SOL_BAL</span>
                             <span>{health?.checks.balance !== null ? health?.checks.balance.toFixed(4) : "--"}</span>
                         </div>
                     </div>
 
                     {/* Messages */}
                     {health?.messages && health.messages.length > 0 && (
-                        <div className="border-t border-green-900 pt-2 text-gray-400">
+                        <div className="border-t border-[#00ff41] pt-2 text-[#00ff41]/70">
                             {health.messages.map((msg, i) => (
-                                <div key={i} className="truncate">{msg}</div>
+                                <div key={i} className="truncate">> {msg}</div>
                             ))}
                         </div>
                     )}
 
                     {/* RPC Latency */}
-                    <div className="border-t border-green-900 pt-2">
-                        <div className="mb-1 font-bold text-gray-500">RPC LATENCY</div>
+                    <div className="border-t border-[#00ff41] pt-2">
+                        <div className="mb-1 font-bold text-[#00ff41]/50">RPC_LATENCY_MS</div>
                         {rpcStats.map((stat, i) => (
-                            <div key={i} className="flex justify-between text-gray-400">
+                            <div key={i} className="flex justify-between text-[#00ff41]/70">
                                 <span className="truncate w-24">{new URL(stat.endpoint).hostname}</span>
-                                <span className={stat.latency < 500 ? "text-green-400" : "text-yellow-400"}>
+                                <span className={stat.latency < 500 ? "text-[#00ff41]" : "text-yellow-500"}>
                                     {stat.latency}ms
                                 </span>
                             </div>

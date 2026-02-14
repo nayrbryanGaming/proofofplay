@@ -1,34 +1,29 @@
-"use client";
+import type { Metadata } from "next";
+import { Inter } from "next/font/google";
+import AppWalletProvider from "../components/AppWalletProvider";
 
-import React from "react";
-import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
-import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import { PhantomWalletAdapter, SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
-import "@solana/wallet-adapter-react-ui/styles.css";
+const inter = Inter({ subsets: ["latin"] });
 
-const endpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://api.devnet.solana.com";
+export const metadata: Metadata = {
+  title: "Proof of Play Dungeon",
+  description: "Infinite On-Chain Dungeon Crawler on Solana",
+};
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const wallets = React.useMemo(
-    () => [
-      new PhantomWalletAdapter(),
-      new SolflareWalletAdapter()
-    ],
-    []
-  );
-
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en">
       <head>
-        <title>Proof of Play Dungeon - On-Chain Game</title>
-        <meta name="description" content="True on-chain gaming on Solana" />
+        <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#00ff41" />
       </head>
-      <body>
-        <ConnectionProvider endpoint={endpoint}>
-          <WalletProvider wallets={wallets} autoConnect>
-            <WalletModalProvider>{children}</WalletModalProvider>
-          </WalletProvider>
-        </ConnectionProvider>
+      <body className={inter.className}>
+        <AppWalletProvider>
+          {children}
+        </AppWalletProvider>
       </body>
     </html>
   );

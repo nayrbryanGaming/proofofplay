@@ -1,129 +1,130 @@
 use anchor_lang::prelude::*;
-use solana_program::keccak::hashv;
+use anchor_lang::solana_program::keccak::hashv;
 
-declare_id!("ReplaceWithYourProgramIdAfterDeploy000000000000");
+declare_id!("3QFQBFSLCAqenWMdTaj9HBHVCjJwzD19Wz9ELvSd5fmK"); // Default Devnet ID, change after deploy
 
 #[program]
 pub mod proof_of_play {
     use super::*;
 
-    /// Initialize a new player account
-    /// Security: Validates stat bounds to prevent exploits
-    pub fn init_player(ctx: Context<InitPlayer>, hp: u8, atk: u8, def: u8) -> Result<()> {
-        // Validate stats are within reasonable bounds
-        require!(hp > 0 && hp <= 100, ProofOfPlayError::InvalidStats);
-        require!(atk > 0 && atk <= 50, ProofOfPlayError::InvalidStats);
-        require!(def <= 20, ProofOfPlayError::InvalidStats);
-
+    pub fn init_player(ctx: Context<InitPlayer>) -> Result<()> {
         let player = &mut ctx.accounts.player;
-        player.authority = *ctx.accounts.authority.key;
-        player.hp = hp;
-        player.atk = atk;
-        player.def = def;
+        player.authority = ctx.accounts.authority.key();
+        player.hp = 100;
+        player.atk = 10;
+        player.def = 5;
         player.last_event = [0u8; 32];
         player.can_claim = false;
         
-        msg!("Player initialized: HP={}, ATK={}, DEF={}", hp, atk, def);
+        msg!("Player initialized for authority: {}", player.authority);
         Ok(())
     }
 
-    /// Generate a random event using on-chain data
-    /// Security: Uses clock slot + player state for unpredictable RNG
-    pub fn explore(ctx: Context<ModifyPlayer>) -> Result<()> {
+    pub fn explore(ctx: Context<Explore>) -> Result<()> {
         let player = &mut ctx.accounts.player;
-        
-        // Security: Verify player is alive
-        require!(player.hp > 0, ProofOfPlayError::PlayerDead);
-        
-        // Generate unpredictable hash
+        require!(player.hp > 0, GameError::PlayerDead);
+
+        // Deterministic Entropy Source
+        // 1. Slot (Time)
+        // 2. Player Address (Identity)
+        // 3. Previous State (History)
+        // 4. Block Timestamp (Variation)
         let clock = Clock::get()?;
-        let slot_bytes = clock.slot.to_le_bytes();
-        let unix_ts = clock.unix_timestamp.to_le_bytes();
+        let slot = clock.slot.to_le_bytes();
+        let timestamp = clock.unix_timestamp.to_le_bytes();
+        let authority = player.authority.to_bytes();
+        let old_state = player.last_event;
+
+        let seeds = &[
+            &slot[..],
+            &timestamp[..],
+            &authority[..],
+            &old_state[..],
+            &player.hp.to_le_bytes(),
+        ];
         
-        let mut seed_parts: Vec<&[u8]> = Vec::new();
-        seed_parts.push(&slot_bytes);
-        seed_parts.push(&unix_ts);
-        seed_parts.push(&player.hp.to_le_bytes());
-        seed_parts.push(&player.atk.to_le_bytes());
-        seed_parts.push(&player.def.to_le_bytes());
-        seed_parts.push(player.authority.as_ref());
-        
-        let digest = hashv(&seed_parts);
-        player.last_event = digest.0;
-        
-        msg!("Event generated: hash={:?}", &digest.0[..4]);
+        // Generate Event Hash
+        let event_hash = hashv(seeds).0;
+        player.last_event = event_hash;
+
+        msg!("Explored! Event Hash: {:?}", event_hash);
         Ok(())
     }
 
-    /// Execute battle against generated enemy
-    /// Security: Validates event exists and player is alive, prevents replay
-    pub fn fight(ctx: Context<ModifyPlayer>) -> Result<()> {
+    pub fn fight(ctx: Context<Fight>) -> Result<()> {
         let player = &mut ctx.accounts.player;
-        let h = player.last_event;
+        require!(player.hp > 0, GameError::PlayerDead);
+        require!(player.last_event != [0u8; 32], GameError::NoEventFound);
+
+        // Derive Enemy from Event Hash
+        let hash = player.last_event;
         
-        // Security: Must explore first
-        require!(h != [0u8; 32], ProofOfPlayError::NoEvent);
-        
-        // Security: Player must be alive
-        require!(player.hp > 0, ProofOfPlayError::PlayerDead);
+        // Procedural Monster Stats (Derived from Bytes 0-2)
+        // HP: 20-50 (Byte 0 % 30 + 20)
+        let monster_hp = (hash[0] as u16 % 30) + 20; 
+        // ATK: 5-15 (Byte 1 % 10 + 5)
+        let monster_atk = (hash[1] as u16 % 10) + 5; 
+        // DEF: 0-5 (Byte 2 % 5)
+        let monster_def = (hash[2] as u16 % 5);
 
-        // Derive enemy stats from hash (deterministic)
-        let enemy_hp = 1u8.saturating_add(h[0] % 10);
-        let enemy_atk = 1u8.saturating_add(h[1] % 6);
-        let enemy_def = h[2] % 5;
+        msg!("Fighting Monster! HP: {}, ATK: {}, DEF: {}", monster_hp, monster_atk, monster_def);
 
-        msg!("Enemy stats: HP={}, ATK={}, DEF={}", enemy_hp, enemy_atk, enemy_def);
+        // Combat Math
+        // Player Dmg = (Player Atk - Monster Def).max(1)
+        let player_dmg = (player.atk as u16).saturating_sub(monster_def).max(1);
+        // Monster Dmg = (Monster Atk - Player Def).max(1)
+        let monster_dmg = monster_atk.saturating_sub(player.def as u16).max(1);
 
-        // Calculate damage with saturation (no underflow)
-        let player_damage = player.atk.saturating_sub(enemy_def);
-        let enemy_remaining = enemy_hp.saturating_sub(player_damage);
+        // Rounds to kill monster
+        let rounds_to_kill = (monster_hp + player_dmg - 1) / player_dmg;
+        // Rounds to kill player
+        let rounds_to_die = (player.hp as u16 + monster_dmg - 1) / monster_dmg;
 
-        let player_remaining = if enemy_remaining == 0 {
-            player.hp // Victory: no damage taken
-        } else {
-            let enemy_damage = enemy_atk.saturating_sub(player.def);
-            player.hp.saturating_sub(enemy_damage)
-        };
-
-        // Update game state
-        if enemy_remaining == 0 && player_remaining > 0 {
+        if rounds_to_kill <= rounds_to_die {
+            // Victory
+            // Victory
+            let damage_taken = (rounds_to_kill - 1) * monster_dmg;
+            // Fix: Cap damage at 255 to prevent casting overflow (e.g. 300u16 as u8 -> 44u8)
+            let damage_u8 = if damage_taken > 255 { 255 } else { damage_taken as u8 };
+            player.hp = player.hp.saturating_sub(damage_u8);
             player.can_claim = true;
-            msg!("Victory! Reward available.");
+            // Clear event to prevent replay
+            player.last_event = [0u8; 32];
+            msg!("Victory! HP Left: {}. Claim Unlocked.", player.hp);
         } else {
-            player.hp = player_remaining;
-            msg!("Defeat. HP remaining: {}", player_remaining);
+            // Defeat
+            player.hp = 0;
+            player.can_claim = false;
+            player.last_event = [0u8; 32];
+            msg!("Defeat! Player has died.");
         }
-        
-        // Anti-replay: Clear event after use
-        player.last_event = [0u8; 32];
 
         Ok(())
     }
 
-    /// Claim reward after victory
-    /// Security: Validates claim flag, resets to prevent double-claim
-    pub fn claim(ctx: Context<ModifyPlayer>) -> Result<()> {
+    pub fn claim(ctx: Context<Claim>) -> Result<()> {
         let player = &mut ctx.accounts.player;
+        require!(player.can_claim, GameError::NoRewardInfo);
+
+        // In a real scenario, this would CPI to a Token Program or assert a specific state for the frontend to execute a swap.
+        // For this architecture, we reset the flag, verifying the "Claim" action happened.
         
-        // Security: Must have reward available
-        require!(player.can_claim, ProofOfPlayError::NothingToClaim);
-        
-        // Reset claim flag (prevents double-claim)
         player.can_claim = false;
+        // Heal partial HP on claim as a bonus?
+        player.hp = player.hp.saturating_add(20).min(100);
         
-        msg!("Reward claimed by {}", player.authority);
+        msg!("Reward Claimed! Player healed +20 HP.");
         Ok(())
     }
 }
 
 #[derive(Accounts)]
-#[instruction(hp: u8, atk: u8, def: u8)]
 pub struct InitPlayer<'info> {
     #[account(
-        init,
-        payer = authority,
-        space = Player::SPACE,
-        seeds = [b"player", authority.key().as_ref()],
+        init, 
+        payer = authority, 
+        space = 8 + 32 + 1 + 1 + 1 + 32 + 1,
+        seeds = [b"player", authority.key().as_ref()], 
         bump
     )]
     pub player: Account<'info, Player>,
@@ -133,12 +134,36 @@ pub struct InitPlayer<'info> {
 }
 
 #[derive(Accounts)]
-pub struct ModifyPlayer<'info> {
+pub struct Explore<'info> {
     #[account(
         mut,
-        seeds = [b"player", player.authority.as_ref()],
+        seeds = [b"player", authority.key().as_ref()], 
         bump,
-        constraint = player.authority == authority.key() @ ProofOfPlayError::Unauthorized
+        has_one = authority
+    )]
+    pub player: Account<'info, Player>,
+    pub authority: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct Fight<'info> {
+    #[account(
+        mut,
+        seeds = [b"player", authority.key().as_ref()], 
+        bump,
+        has_one = authority
+    )]
+    pub player: Account<'info, Player>,
+    pub authority: Signer<'info>,
+}
+
+#[derive(Accounts)]
+pub struct Claim<'info> {
+    #[account(
+        mut,
+        seeds = [b"player", authority.key().as_ref()], 
+        bump,
+        has_one = authority
     )]
     pub player: Account<'info, Player>,
     pub authority: Signer<'info>,
@@ -154,20 +179,12 @@ pub struct Player {
     pub can_claim: bool,
 }
 
-impl Player {
-    pub const SPACE: usize = 8 + 32 + 1 + 1 + 1 + 32 + 1;
-}
-
 #[error_code]
-pub enum ProofOfPlayError {
-    #[msg("No event generated yet. Call explore first.")]
-    NoEvent,
-    #[msg("Nothing to claim. Win a battle first.")]
-    NothingToClaim,
-    #[msg("Player is dead. HP = 0.")]
+pub enum GameError {
+    #[msg("Player is dead. Init new player.")]
     PlayerDead,
-    #[msg("Invalid stats. HP must be 1-100, ATK 1-50, DEF 0-20.")]
-    InvalidStats,
-    #[msg("Unauthorized. You are not the player owner.")]
-    Unauthorized,
+    #[msg("No event generated. Explore first.")]
+    NoEventFound,
+    #[msg("No reward to claim.")]
+    NoRewardInfo,
 }
