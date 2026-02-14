@@ -73,7 +73,7 @@ export const DiagnosticPanel = () => {
             </div>
 
             {loading && !health ? (
-                <div className="text-center py-4 animate-pulse">>> ANALYZING_NETWORK...</div>
+                <div className="text-center py-4 animate-pulse">ANALYZING_NETWORK...</div>
             ) : (
                 <div className="space-y-4 max-h-96 overflow-y-auto custom-scrollbar">
                     {/* Overall Status */}
@@ -104,7 +104,7 @@ export const DiagnosticPanel = () => {
                     {health?.messages && health.messages.length > 0 && (
                         <div className="border-t border-[#00ff41] pt-2 text-[#00ff41]/70">
                             {health.messages.map((msg, i) => (
-                                <div key={i} className="truncate">> {msg}</div>
+                                <div key={i} className="truncate">&gt; {msg}</div>
                             ))}
                         </div>
                     )}
