@@ -1,0 +1,6 @@
+scripts/
+tests/
+programs/
+target/
+*.md
+!app/
