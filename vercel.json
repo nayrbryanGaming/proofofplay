@@ -1,9 +1,4 @@
 {
-    "version": 2,
-    "buildCommand": "cd app && npm install && npm run build",
-    "outputDirectory": "app/out",
-    "installCommand": "cd app && npm install",
-    "framework": "nextjs",
     "cleanUrls": true,
     "trailingSlash": false
 }
