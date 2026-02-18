@@ -1,0 +1,6 @@
+{
+    "version": 2,
+    "outputDirectory": "out",
+    "framework": "nextjs",
+    "cleanUrls": true
+}

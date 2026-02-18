@@ -1,7 +1,8 @@
 {
-    "buildCommand": "npm run build",
-    "outputDirectory": "out",
-    "installCommand": "npm install",
-    "cleanUrls": true,
-    "trailingSlash": false
+    "version": 2,
+    "buildCommand": "cd app && npm install --legacy-peer-deps && npm run build",
+    "outputDirectory": "app/out",
+    "installCommand": "cd app && npm install --legacy-peer-deps",
+    "framework": "nextjs",
+    "cleanUrls": true
 }
