@@ -372,22 +372,29 @@ export default function GameInterface() {
             {/* CRT Scanline Overlay */}
             <div className="scanline"></div>
 
-            <h1 className="text-3xl mb-6 border-b-2 border-[#00ff41] w-full max-w-md text-center pb-2 flex justify-between items-center px-2 tracking-widest drop-shadow-[0_0_10px_rgba(0,255,65,0.8)]">
-                <span className="font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#00ff41] to-blue-500">
-                    PROOF_OF_PLAY_DUNGEON
-                </span>
-                <div className="flex flex-col items-end">
-                    <span className="text-[8px] text-[#00ff41] font-bold tracking-tighter opacity-80 uppercase">Network: Devnet (Infinite)</span>
+            <div className="w-full max-w-md mb-6 flex flex-col items-center">
+                <h1 className="text-2xl sm:text-3xl font-bold text-center tracking-widest drop-shadow-[0_0_10px_rgba(0,255,65,0.8)] border-b-2 border-[#00ff41] w-full pb-2 mb-2">
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff41] to-blue-500">
+                        PROOF_OF_PLAY
+                    </span>
+                    <span className="block text-sm sm:text-lg text-[#00ff41]">DUNGEON_ETERNAL</span>
+                </h1>
+
+                <div className="w-full flex justify-between items-end px-2">
+                    <span className="text-[10px] text-[#00ff41] font-bold tracking-tighter opacity-80 uppercase flex items-center gap-1">
+                        <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        NET: DEVNET (LIVE_RPC)
+                    </span>
                     <button
                         onClick={() => setShowVisuals(!showVisuals)}
                         className={`text-[10px] px-3 py-1 border transition-all duration-300 psg1-glow ${showVisuals
                             ? 'bg-[#00ff41] text-black border-[#00ff41] font-bold'
                             : 'bg-black border-[#00ff41] text-[#00ff41]'}`}
                     >
-                        {showVisuals ? '[ VISUAL_MODE: ON ]' : '[ TEXT_ONLY ]'}
+                        {showVisuals ? '[ VISUALS: ON ]' : '[ TEXT_ONLY ]'}
                     </button>
                 </div>
-            </h1>
+            </div>
 
             {/* Step 7.5: Procedural Graphics Layer */}
             {showVisuals && (
