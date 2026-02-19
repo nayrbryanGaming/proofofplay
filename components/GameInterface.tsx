@@ -104,7 +104,48 @@ export default function GameInterface() {
         if (msg.toLowerCase().includes("network mismatch") || msg.toLowerCase().includes("blockhash")) {
             finalMsg = "⚠️ WRONG NETWORK! Please switch your wallet to DEVNET.";
         }
+        if (msg.toLowerCase().includes("0x1") || msg.includes("attempt to debit an account but found no record")) {
+            finalMsg = "⚠️ INSUFFICIENT SOL! You need Devnet SOL to play.";
+        }
         setLogs((prev) => [...prev, `[${new Date().toLocaleTimeString()}] ${finalMsg}`]);
+    };
+
+    // --- Step 3.2: Balance Check & Airdrop ---
+    const [balance, setBalance] = useState<number>(0);
+
+    const checkBalance = async () => {
+        if (!anchorWallet || !connection) return;
+        try {
+            const bal = await connection.getBalance(anchorWallet.publicKey);
+            setBalance(bal / web3.LAMPORTS_PER_SOL);
+            if (bal < 0.05 * web3.LAMPORTS_PER_SOL) {
+                addLog("⚠️ LOW BALANCE: You may need Devnet SOL to initialize.");
+            }
+        } catch (e) {
+            console.error("Balance check failed", e);
+        }
+    };
+
+    useEffect(() => {
+        if (connected) {
+            checkBalance();
+        }
+    }, [connected, connection, anchorWallet]);
+
+    const requestAirdrop = async () => {
+        if (!anchorWallet) return;
+        setLoading("airdrop");
+        try {
+            addLog("💧 Requesting 1 SOL Airdrop from Devnet...");
+            const signature = await connection.requestAirdrop(anchorWallet.publicKey, 1 * web3.LAMPORTS_PER_SOL);
+            await confirmTransaction(signature);
+            addLog("✅ Airdrop Received! Balance updated.");
+            checkBalance();
+        } catch (e) {
+            addLog("❌ AIRDROP FAILED: Devnet faucet might be rate-limited. Try https://faucet.solana.com");
+        } finally {
+            setLoading(null);
+        }
     };
 
     // --- Step 3.5: PDA Derivation Implementation ---
@@ -433,6 +474,15 @@ export default function GameInterface() {
                     <p>ATK: <span className="text-white">{gameState?.atk ?? '---'}</span></p>
                     <p>DEF: <span className="text-white">{gameState?.def ?? '---'}</span></p>
                     <p className="col-span-2">REWARD: <span className={gameState?.canClaim ? "text-yellow-400 font-bold blink" : "text-gray-500"}>{gameState?.canClaim ? 'AVAILABLE' : 'LOCKED'}</span></p>
+                    {balance < 0.5 && (
+                        <button
+                            onClick={requestAirdrop}
+                            disabled={loading === "airdrop"}
+                            className="col-span-2 mt-1 border border-yellow-500 text-yellow-500 text-xs py-1 hover:bg-yellow-500 hover:text-black transition-colors uppercase"
+                        >
+                            {loading === "airdrop" ? "REQUESTING..." : "⚠️ LOW BAL: REQUEST 1 SOL AIRDROP"}
+                        </button>
+                    )}
                 </div>
                 <div className="text-[10px] text-gray-400 mt-2 text-right flex justify-end items-center gap-2">
                     <span className="flex items-center gap-1 text-[#00ff41] animate-pulse">
