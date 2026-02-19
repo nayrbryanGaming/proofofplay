@@ -1,7 +1,7 @@
 "use client";
 
 import { useWallet, useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
-import { WalletMultiButton, WalletDisconnectButton } from "@solana/wallet-adapter-react-ui";
+import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
 import { Program, AnchorProvider, web3, BN } from "@coral-xyz/anchor";
 import { useState, useEffect } from "react";
 import idl from "./idl.json"; // You will need to copy your IDL here after build
@@ -26,7 +26,7 @@ interface PlayerAccount {
 }
 
 export default function GameInterface() {
-    const { publicKey: waPublicKey, wallet, connected } = useWallet();
+    const { publicKey: waPublicKey, wallet, connected, connecting, disconnect } = useWallet();
     const anchorWallet = useAnchorWallet();
     const { connection } = useConnection();
     const [program, setProgram] = useState<Program | null>(null);
@@ -413,8 +413,14 @@ export default function GameInterface() {
             {/* Wallet Connect/Disconnect Group */}
             <div className="w-full max-w-md mb-6 relative z-10 flex flex-col gap-2">
                 <WalletMultiButton className="!bg-[#00ff41] !text-black !font-bold !w-full !py-3 !text-lg !rounded-none !uppercase !tracking-widest hover:!scale-105 transition-transform !border-2 !border-[#00ff41]" />
-                {connected && (
-                    <WalletDisconnectButton className="!bg-red-900/20 !text-red-500 !font-bold !w-full !py-2 !text-sm !rounded-none !uppercase !tracking-widest hover:!bg-red-900/50 transition-colors !border !border-red-500 justify-center" />
+
+                {(connected || connecting) && (
+                    <button
+                        onClick={disconnect}
+                        className="bg-red-900/40 text-red-500 border-2 border-red-500 w-full py-3 text-lg font-bold uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all duration-200 psg1-glow shadow-[0_0_10px_rgba(255,0,0,0.3)]"
+                    >
+                        {connecting ? "CANCEL / CHANGE_WALLET" : "DISCONNECT_WALLET"}
+                    </button>
                 )}
             </div>
 
