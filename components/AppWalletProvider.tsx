@@ -3,7 +3,14 @@
 import React, { useMemo } from "react";
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
-import { PhantomWalletAdapter, SolflareWalletAdapter } from "@solana/wallet-adapter-wallets";
+import {
+    PhantomWalletAdapter,
+    SolflareWalletAdapter,
+    TrustWalletAdapter,
+    CoinbaseWalletAdapter,
+    TorusWalletAdapter,
+    LedgerWalletAdapter
+} from "@solana/wallet-adapter-wallets";
 import "@solana/wallet-adapter-react-ui/styles.css";
 
 // Import globals here to ensure they load
@@ -16,6 +23,10 @@ export default function AppWalletProvider({ children }: { children: React.ReactN
         () => [
             new PhantomWalletAdapter(),
             new SolflareWalletAdapter(),
+            new TrustWalletAdapter(),
+            new CoinbaseWalletAdapter(),
+            new TorusWalletAdapter(),
+            new LedgerWalletAdapter(),
         ],
         []
     );
