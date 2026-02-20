@@ -30,7 +30,7 @@ interface PlayerAccount {
 }
 
 export default function GameInterface() {
-    const { publicKey: waPublicKey, wallet, connected, connecting, disconnect } = useWallet();
+    const { publicKey: waPublicKey, connected, connecting, disconnect, select, connect, wallets } = useWallet();
     const anchorWallet = useAnchorWallet();
     const { connection } = useConnection();
     const [program, setProgram] = useState<Program | null>(null);
@@ -527,9 +527,9 @@ export default function GameInterface() {
         if (connected) return;
         try {
             addLog("Attempting direct connection to Phantom...");
-            const phantom = wallets.find(w => w.adapter.name === 'Phantom');
+            const phantom = wallets.find((w: any) => w.adapter.name === 'Phantom');
             if (phantom) {
-                await select(phantom.adapter.name);
+                await select(phantom.adapter.name as any);
                 await connect();
             } else {
                 addLog("Phantom not detected in adapter list.");
