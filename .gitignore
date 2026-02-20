@@ -41,6 +41,9 @@ target/
 .anchor/
 test-ledger/
 .deploy/
+temp_solana/
+temp_solana_install_2/
+temp_solana_stable/
 
 # IDE
 .vscode/
