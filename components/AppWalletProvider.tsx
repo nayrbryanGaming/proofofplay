@@ -17,7 +17,7 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import "../app/globals.css";
 
 export default function AppWalletProvider({ children }: { children: React.ReactNode }) {
-    const endpoint = "https://api.devnet.solana.com";
+    const endpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://api.devnet.solana.com";
 
     const wallets = useMemo(
         () => [
@@ -33,7 +33,7 @@ export default function AppWalletProvider({ children }: { children: React.ReactN
 
     return (
         <ConnectionProvider endpoint={endpoint}>
-            <WalletProvider wallets={wallets} autoConnect={false}>
+            <WalletProvider wallets={wallets} autoConnect={true}>
                 <WalletModalProvider>{children}</WalletModalProvider>
             </WalletProvider>
         </ConnectionProvider>
