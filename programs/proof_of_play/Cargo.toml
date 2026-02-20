@@ -16,4 +16,6 @@ cpi = ["no-entrypoint"]
 default = []
 
 [dependencies]
-anchor-lang = "0.30.1"
+anchor-lang = "0.29.0"
+[patch.crates-io]
+constant_time_eq = { path = "../../constant_time_eq-0.4.1" }
