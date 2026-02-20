@@ -520,143 +520,180 @@ export default function GameInterface() {
         } finally {
             setLoading(null);
         }
-    };
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen bg-black text-[#00ff41] font-mono p-4 relative overflow-hidden crt-flicker">
+                {/* CRT Scanline Overlay */}
+                <div className="scanline"></div>
 
-    {/* Wallet Connect/Disconnect Group */ }
-    <div className="w-full max-w-md mb-6 relative z-10 flex flex-col gap-2">
-        <WalletMultiButton className="!bg-[#00ff41] !text-black !font-bold !w-full !py-3 !text-lg !rounded-none !uppercase !tracking-widest hover:!scale-105 transition-transform !border-2 !border-[#00ff41]" />
+                <div className="w-full max-w-md mb-6 flex flex-col items-center">
+                    <h1 className="text-2xl sm:text-3xl font-bold text-center tracking-widest drop-shadow-[0_0_10px_rgba(0,255,65,0.8)] border-b-2 border-[#00ff41] w-full pb-2 mb-2">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff41] to-blue-500">
+                            PROOF_OF_PLAY
+                        </span>
+                        <span className="block text-sm sm:text-lg text-[#00ff41]">DUNGEON_ETERNAL</span>
+                    </h1>
 
-        {(connected || connecting) && (
-            <button
-                onClick={disconnect}
-                className="bg-red-900/40 text-red-500 border-2 border-red-500 w-full py-3 text-lg font-bold uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all duration-200 psg1-glow shadow-[0_0_10px_rgba(255,0,0,0.3)]"
-            >
-                {connecting ? "CANCEL / CHANGE_WALLET" : "DISCONNECT_WALLET"}
-            </button>
-        )}
-    </div>
+                    <div className="w-full flex justify-between items-end px-2">
+                        <span className="text-[10px] text-[#00ff41] font-bold tracking-tighter opacity-80 uppercase flex items-center gap-1">
+                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                            NET: DEVNET (LIVE_RPC)
+                        </span>
+                        <button
+                            onClick={() => setShowVisuals(!showVisuals)}
+                            className={`text-[10px] px-3 py-1 border transition-all duration-300 psg1-glow ${showVisuals
+                                ? 'bg-[#00ff41] text-black border-[#00ff41] font-bold'
+                                : 'bg-black border-[#00ff41] text-[#00ff41]'}`}
+                        >
+                            {showVisuals ? '[ VISUALS: ON ]' : '[ TEXT_ONLY ]'}
+                        </button>
+                    </div>
+                </div>
 
-    {/* Status Panel */ }
-    <div className="w-full max-w-md border-2 border-[#00ff41] p-4 mb-4 bg-black/80 backdrop-blur-sm shadow-[0_0_10px_rgba(0,255,65,0.1)] relative z-10">
-        <h2 className="text-lg font-bold mb-2 border-b border-[#00ff41] pb-1 text-yellow-400">:: PLAYER_STATUS ::</h2>
-        <div className="grid grid-cols-2 gap-2 text-sm">
-            <p>LEVEL: <span className="text-white font-bold">{gameState?.level ?? '---'}</span></p>
-            <p>HP: <span className="text-white">{gameState?.hp ?? '---'}</span></p>
-            <p>ATK: <span className="text-white">{gameState?.atk ?? '---'}</span></p>
-            <p>DEF: <span className="text-white">{gameState?.def ?? '---'}</span></p>
-            <p className="col-span-2">REWARD: <span className={gameState?.canClaim ? "text-yellow-400 font-bold blink" : "text-gray-500"}>{gameState?.canClaim ? 'AVAILABLE' : 'LOCKED'}</span></p>
-            {balance < 0.5 && (
-                <button
-                    onClick={requestAirdrop}
-                    disabled={loading === "airdrop"}
-                    className="col-span-2 mt-1 border border-yellow-500 text-yellow-500 text-xs py-1 hover:bg-yellow-500 hover:text-black transition-colors uppercase"
-                >
-                    {loading === "airdrop" ? "REQUESTING..." : "⚠️ LOW BAL: REQUEST 1 SOL AIRDROP"}
-                </button>
-            )}
-        </div>
-        <div className="text-[10px] text-gray-400 mt-2 text-right flex justify-end items-center gap-2">
-            <span className="flex items-center gap-1 text-[#00ff41] animate-pulse">
-                <span className="w-2 h-2 rounded-full bg-[#00ff41]"></span>
-                LIVE_NETWORK
-            </span>
-            <span>LAST_SYNC: {new Date(lastRefresh).toLocaleTimeString()}</span>
-        </div>
-        <button
-            onClick={refreshAccount}
-            disabled={loading === "refresh"}
-            className="mt-3 w-full border border-[#00ff41] text-[#00ff41] px-3 py-1 text-xs hover:bg-[#00ff41] hover:text-black transition-colors uppercase disabled:opacity-50"
-        >
-            {loading === "refresh" ? "SYNCING..." : "FORCE_REFRESH_STATE"}
-        </button>
-    </div>
-
-    {/* Inventory Panel */ }
-    <div className="w-full max-w-md border border-gray-800 p-4 mb-6 bg-gray-900/50 relative z-10">
-        <h3 className="text-xs text-gray-500 mb-2 uppercase tracking-wide">:: EQUIPMENT_SLOT (METAPLEX) ::</h3>
-        <div className="flex items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-                {equippedItem ? (
-                    <>
-                        <div className="w-8 h-8 bg-yellow-900 border border-yellow-500 flex items-center justify-center text-yellow-500 text-xs font-bold">NFT</div>
-                        <div>
-                            <span className="text-yellow-400 font-bold block">{equippedItem.name}</span>
-                            <span className="text-xs text-[#00ff41]">+ {equippedItem.atk} ATK POWER</span>
-                        </div>
-                    </>
-                ) : (
-                    <span className="text-gray-600 italic">[ NO_ITEM_DETECTED ]</span>
+                {/* Step 7.5: Procedural Graphics Layer */}
+                {showVisuals && (
+                    <div className="w-full max-w-md mb-6 border-2 border-[#00ff41] p-1 shadow-[0_0_20px_rgba(0,255,65,0.2)]">
+                        <ProceduralVisualizer
+                            hash={gameState?.lastEvent || Array(32).fill(0)}
+                            isFighting={loading === "fight"}
+                        />
+                    </div>
                 )}
-            </div>
-            {equippedItem && (
-                <button
-                    onClick={equipItemOnChain}
-                    disabled={loading === "equip"}
-                    className="bg-yellow-600 text-black px-4 py-1 text-xs font-bold uppercase hover:bg-yellow-400 disabled:opacity-50"
-                >
-                    {loading === "equip" ? "EQUIPPING..." : "EQUIP_ON_CHAIN"}
-                </button>
-            )}
-        </div>
-    </div>
 
-    {/* Actions - PSG1 Large Buttons */ }
-    <div className="grid grid-cols-1 gap-4 w-full max-w-md mb-6 relative z-10">
-        <button
-            onClick={initPlayer}
-            disabled={loading === "init"}
-            className="bg-blue-900/20 text-blue-400 border-2 border-blue-500 p-4 text-xl font-bold uppercase tracking-widest hover:bg-blue-500 hover:text-black transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed psg1-glow"
-        >
-            {loading === "init" ? "INITIALIZING..." : "1. INITIALIZE_PDA"}
-        </button>
-        <button
-            onClick={explore}
-            disabled={loading === "explore"}
-            className="bg-gray-800/20 text-gray-300 border-2 border-gray-500 p-4 text-xl font-bold uppercase tracking-widest hover:bg-gray-500 hover:text-black transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed psg1-glow"
-        >
-            {loading === "explore" ? "GENERATING_HASH..." : "2. EXPLORE_DUNGEON"}
-        </button>
-        <button
-            onClick={fight}
-            disabled={loading === "fight"}
-            className="bg-red-900/20 text-red-500 border-2 border-red-500 p-4 text-xl font-bold uppercase tracking-widest hover:bg-red-600 hover:text-black transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed psg1-glow"
-        >
-            {loading === "fight" ? "COMBAT_CALC..." : "3. FIGHT_MONSTER"}
-        </button>
-        <button
-            onClick={claim}
-            disabled={!gameState?.canClaim || loading === "claim"}
-            className={`p-4 text-xl font-bold uppercase tracking-widest border-2 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-lg ${gameState?.canClaim && loading !== "claim"
-                ? 'bg-green-900/20 text-green-400 border-green-500 hover:bg-green-500 hover:text-black psg1-glow animate-pulse'
-                : 'bg-gray-900 border-gray-800 text-gray-600'
-                }`}
-        >
-            {loading === "claim" ? "SWAPPING_REWARD..." : `4. CLAIM_LOOT ${gameState?.canClaim ? "($)" : "[LOCKED]"}`}
-        </button>
-    </div>
+                {/* Wallet Connect/Disconnect Group */}
+                <div className="w-full max-w-md mb-6 relative z-10 flex flex-col gap-2">
+                    <WalletMultiButton className="!bg-[#00ff41] !text-black !font-bold !w-full !py-3 !text-lg !rounded-none !uppercase !tracking-widest hover:!scale-105 transition-transform !border-2 !border-[#00ff41]" />
 
-    {/* Log Panel */ }
-    <div className="w-full max-w-md h-48 border-2 border-[#00ff41] p-3 overflow-y-auto font-mono text-xs bg-black/90 shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] relative z-10 custom-scrollbar">
-        <div className="border-b border-gray-800 mb-2 pb-1 text-gray-500 uppercase tracking-wider text-[10px]">:: SYSTEM_LOGS ::</div>
-        {logs.length === 0 && <div className="text-gray-700 blink">_ WAITING_FOR_INPUT...</div>}
-        {logs.map((l, i) => (
-            <div key={i} className="mb-1 text-[#00ff41] font-bold text-shadow flex">
-                <span className="mr-2 opacity-50">{">"}</span>
-                <span>{l}</span>
-            </div>
-        ))}
-        <div ref={(el) => { if (el) el.scrollIntoView({ behavior: "smooth" }); }} />
-    </div>
+                    {(connected || connecting) && (
+                        <button
+                            onClick={disconnect}
+                            className="bg-red-900/40 text-red-500 border-2 border-red-500 w-full py-3 text-lg font-bold uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all duration-200 psg1-glow shadow-[0_0_10px_rgba(255,0,0,0.3)]"
+                        >
+                            {connecting ? "CANCEL / CHANGE_WALLET" : "DISCONNECT_WALLET"}
+                        </button>
+                    )}
+                </div>
 
-    {/* Real-time Diagnostics */ }
-    <div className="mt-4 w-full max-w-md opacity-70 hover:opacity-100 transition-opacity">
-        <DiagnosticPanel />
-    </div>
+                {/* Status Panel */}
+                <div className="w-full max-w-md border-2 border-[#00ff41] p-4 mb-4 bg-black/80 backdrop-blur-sm shadow-[0_0_10px_rgba(0,255,65,0.1)] relative z-10">
+                    <h2 className="text-lg font-bold mb-2 border-b border-[#00ff41] pb-1 text-yellow-400">:: PLAYER_STATUS ::</h2>
+                    <div className="grid grid-cols-2 gap-2 text-sm">
+                        <p>LEVEL: <span className="text-white font-bold">{gameState?.level ?? '---'}</span></p>
+                        <p>HP: <span className="text-white">{gameState?.hp ?? '---'}</span></p>
+                        <p>ATK: <span className="text-white">{gameState?.atk ?? '---'}</span></p>
+                        <p>DEF: <span className="text-white">{gameState?.def ?? '---'}</span></p>
+                        <p className="col-span-2">REWARD: <span className={gameState?.canClaim ? "text-yellow-400 font-bold blink" : "text-gray-500"}>{gameState?.canClaim ? 'AVAILABLE' : 'LOCKED'}</span></p>
+                        {balance < 0.5 && (
+                            <button
+                                onClick={requestAirdrop}
+                                disabled={loading === "airdrop"}
+                                className="col-span-2 mt-1 border border-yellow-500 text-yellow-500 text-xs py-1 hover:bg-yellow-500 hover:text-black transition-colors uppercase"
+                            >
+                                {loading === "airdrop" ? "REQUESTING..." : "⚠️ LOW BAL: REQUEST 1 SOL AIRDROP"}
+                            </button>
+                        )}
+                    </div>
+                    <div className="text-[10px] text-gray-400 mt-2 text-right flex justify-end items-center gap-2">
+                        <span className="flex items-center gap-1 text-[#00ff41] animate-pulse">
+                            <span className="w-2 h-2 rounded-full bg-[#00ff41]"></span>
+                            LIVE_NETWORK
+                        </span>
+                        <span>LAST_SYNC: {new Date(lastRefresh).toLocaleTimeString()}</span>
+                    </div>
+                    <button
+                        onClick={refreshAccount}
+                        disabled={loading === "refresh"}
+                        className="mt-3 w-full border border-[#00ff41] text-[#00ff41] px-3 py-1 text-xs hover:bg-[#00ff41] hover:text-black transition-colors uppercase disabled:opacity-50"
+                    >
+                        {loading === "refresh" ? "SYNCING..." : "FORCE_REFRESH_STATE"}
+                    </button>
+                </div>
 
-    {/* Transaction History */ }
-    <div className="mt-4 w-full max-w-md">
-        <TransactionHistoryPanel />
-    </div>
-        </div >
-    );
-}
+                {/* Inventory Panel */}
+                <div className="w-full max-w-md border border-gray-800 p-4 mb-6 bg-gray-900/50 relative z-10">
+                    <h3 className="text-xs text-gray-500 mb-2 uppercase tracking-wide">:: EQUIPMENT_SLOT (METAPLEX) ::</h3>
+                    <div className="flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-3">
+                            {equippedItem ? (
+                                <>
+                                    <div className="w-8 h-8 bg-yellow-900 border border-yellow-500 flex items-center justify-center text-yellow-500 text-xs font-bold">NFT</div>
+                                    <div>
+                                        <span className="text-yellow-400 font-bold block">{equippedItem.name}</span>
+                                        <span className="text-xs text-[#00ff41]">+ {equippedItem.atk} ATK POWER</span>
+                                    </div>
+                                </>
+                            ) : (
+                                <span className="text-gray-600 italic">[ NO_ITEM_DETECTED ]</span>
+                            )}
+                        </div>
+                        {equippedItem && (
+                            <button
+                                onClick={equipItemOnChain}
+                                disabled={loading === "equip"}
+                                className="bg-yellow-600 text-black px-4 py-1 text-xs font-bold uppercase hover:bg-yellow-400 disabled:opacity-50"
+                            >
+                                {loading === "equip" ? "EQUIPPING..." : "EQUIP_ON_CHAIN"}
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                {/* Actions - PSG1 Large Buttons */}
+                <div className="grid grid-cols-1 gap-4 w-full max-w-md mb-6 relative z-10">
+                    <button
+                        onClick={initPlayer}
+                        disabled={loading === "init"}
+                        className="bg-blue-900/20 text-blue-400 border-2 border-blue-500 p-4 text-xl font-bold uppercase tracking-widest hover:bg-blue-500 hover:text-black transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed psg1-glow"
+                    >
+                        {loading === "init" ? "INITIALIZING..." : "1. INITIALIZE_PDA"}
+                    </button>
+                    <button
+                        onClick={explore}
+                        disabled={loading === "explore"}
+                        className="bg-gray-800/20 text-gray-300 border-2 border-gray-500 p-4 text-xl font-bold uppercase tracking-widest hover:bg-gray-500 hover:text-black transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed psg1-glow"
+                    >
+                        {loading === "explore" ? "GENERATING_HASH..." : "2. EXPLORE_DUNGEON"}
+                    </button>
+                    <button
+                        onClick={fight}
+                        disabled={loading === "fight"}
+                        className="bg-red-900/20 text-red-500 border-2 border-red-500 p-4 text-xl font-bold uppercase tracking-widest hover:bg-red-600 hover:text-black transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed psg1-glow"
+                    >
+                        {loading === "fight" ? "COMBAT_CALC..." : "3. FIGHT_MONSTER"}
+                    </button>
+                    <button
+                        onClick={claim}
+                        disabled={!gameState?.canClaim || loading === "claim"}
+                        className={`p-4 text-xl font-bold uppercase tracking-widest border-2 transition-all duration-200 disabled:opacity-30 disabled:cursor-not-allowed shadow-lg ${gameState?.canClaim && loading !== "claim"
+                            ? 'bg-green-900/20 text-green-400 border-green-500 hover:bg-green-500 hover:text-black psg1-glow animate-pulse'
+                            : 'bg-gray-900 border-gray-800 text-gray-600'
+                            }`}
+                    >
+                        {loading === "claim" ? "SWAPPING_REWARD..." : `4. CLAIM_LOOT ${gameState?.canClaim ? "($)" : "[LOCKED]"}`}
+                    </button>
+                </div>
+
+                {/* Log Panel */}
+                <div className="w-full max-w-md h-48 border-2 border-[#00ff41] p-3 overflow-y-auto font-mono text-xs bg-black/90 shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] relative z-10 custom-scrollbar">
+                    <div className="border-b border-gray-800 mb-2 pb-1 text-gray-500 uppercase tracking-wider text-[10px]">:: SYSTEM_LOGS ::</div>
+                    {logs.length === 0 && <div className="text-gray-700 blink">_ WAITING_FOR_INPUT...</div>}
+                    {logs.map((l, i) => (
+                        <div key={i} className="mb-1 text-[#00ff41] font-bold text-shadow flex">
+                            <span className="mr-2 opacity-50">{">"}</span>
+                            <span>{l}</span>
+                        </div>
+                    ))}
+                    <div ref={(el) => { if (el) el.scrollIntoView({ behavior: "smooth" }); }} />
+                </div>
+
+                {/* Real-time Diagnostics */}
+                <div className="mt-4 w-full max-w-md opacity-70 hover:opacity-100 transition-opacity">
+                    <DiagnosticPanel />
+                </div>
+
+                {/* Transaction History */}
+                <div className="mt-4 w-full max-w-md">
+                    <TransactionHistoryPanel />
+                </div>
+            </div >
+        );
+    }
