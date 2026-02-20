@@ -1,9 +1,12 @@
 "use client";
 
 import { useWallet, useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
-import { WalletMultiButton } from "@solana/wallet-adapter-react-ui";
-import { Program, AnchorProvider, web3, BN } from "@coral-xyz/anchor";
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
+const WalletMultiButton = dynamic(
+    async () => (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
+    { ssr: false }
+);
 import idl from "./idl.json"; // You will need to copy your IDL here after build
 
 import { getQuote, getSwapTransaction, executeSwap } from "../utils/jupiter";
