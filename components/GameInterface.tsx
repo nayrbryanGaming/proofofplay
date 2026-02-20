@@ -8,14 +8,27 @@ const WalletMultiButton = dynamic(
     async () => (await import("@solana/wallet-adapter-react-ui")).WalletMultiButton,
     { ssr: false }
 );
-import idl from "./idl.json"; // You will need to copy your IDL here after build
 
+const DiagnosticPanel = dynamic(
+    async () => (await import("./DiagnosticPanel")).DiagnosticPanel,
+    { ssr: false }
+);
+
+const TransactionHistoryPanel = dynamic(
+    async () => (await import("./TransactionHistoryPanel")).TransactionHistoryPanel,
+    { ssr: false }
+);
+
+const ProceduralVisualizer = dynamic(
+    async () => (await import("./ProceduralVisualizer")).ProceduralVisualizer,
+    { ssr: false }
+);
+
+import idl from "./idl.json";
 import { getQuote, getSwapTransaction, executeSwap } from "../utils/jupiter";
 import { fetchNftStats } from "../utils/metaplex";
 import { txHistory } from "../utils/transactionHistory";
-import { TransactionHistoryPanel } from "./TransactionHistoryPanel";
-import { DiagnosticPanel } from "./DiagnosticPanel";
-import { ProceduralVisualizer } from "./ProceduralVisualizer";
+
 
 // --- Step 7.5: Enforce PSG1 Style ---
 // Mobile-first (w-full max-w-md), Portrait layout, Large Buttons (p-4 text-xl)
@@ -39,7 +52,20 @@ export default function GameInterface() {
     const [loading, setLoading] = useState<string | null>(null);
     const [lastRefresh, setLastRefresh] = useState<number>(Date.now());
     const [showVisuals, setShowVisuals] = useState<boolean>(false);
-    const [isSimulationMode, setIsSimulationMode] = useState<boolean>(false); // New Flag
+    const [isSimulationMode, setIsSimulationMode] = useState<boolean>(false);
+    const [mounted, setMounted] = useState(false);
+
+    // Hydration guard
+    useEffect(() => {
+        setMounted(true);
+        // Polyfill Buffer for Solana compatibility
+        if (typeof window !== 'undefined' && !window.Buffer) {
+            import('buffer').then(module => {
+                // @ts-ignore
+                window.Buffer = module.Buffer;
+            }).catch(e => console.error("Buffer polyfill failed", e));
+        }
+    }, []);
 
     // --- Step 8.5: Metadata Explanation ---
     // We fetch metadata from the connected wallet's NFT (mocked mint for demo)
@@ -521,6 +547,12 @@ export default function GameInterface() {
             setLoading(null);
         }
     };
+
+    if (!mounted) return (
+        <div className="flex flex-col items-center justify-center min-h-screen bg-black text-[#00ff41] font-mono p-4">
+            <div className="text-2xl animate-pulse">LOADING_SYSTEM_RESOURCES...</div>
+        </div>
+    );
 
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-black text-[#00ff41] font-mono p-4 relative overflow-hidden crt-flicker">
