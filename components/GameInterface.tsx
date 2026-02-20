@@ -522,6 +522,23 @@ export default function GameInterface() {
         }
     };
 
+    // Final Rescue: Manual Connection Logic
+    const handleConnect = async () => {
+        if (connected) return;
+        try {
+            addLog("Attempting direct connection to Phantom...");
+            const phantom = wallets.find(w => w.adapter.name === 'Phantom');
+            if (phantom) {
+                await select(phantom.adapter.name);
+                await connect();
+            } else {
+                addLog("Phantom not detected in adapter list.");
+            }
+        } catch (e: any) {
+            addLog(`Connect Error: ${e.message}`);
+        }
+    };
+
     return (
         <div className="flex flex-col items-center justify-center min-h-screen bg-black text-[#00ff41] font-mono p-4 relative overflow-hidden crt-flicker">
             {/* CRT Scanline Overlay */}
@@ -563,7 +580,12 @@ export default function GameInterface() {
 
             {/* Wallet Connect/Disconnect Group */}
             <div className="w-full max-w-md mb-6 relative z-10 flex flex-col gap-2">
-                <WalletMultiButton className="!bg-[#00ff41] !text-black !font-bold !w-full !py-3 !text-lg !rounded-none !uppercase !tracking-widest hover:!scale-105 transition-transform !border-2 !border-[#00ff41]" />
+                <button
+                    onClick={handleConnect}
+                    className="!bg-[#00ff41] !text-black !font-bold !w-full !py-3 !text-lg !rounded-none !uppercase !tracking-widest hover:!scale-105 transition-transform !border-2 !border-[#00ff41] shadow-[0_0_15px_rgba(0,255,65,0.4)]"
+                >
+                    {connected ? `${waPublicKey?.toBase58().slice(0, 4)}...${waPublicKey?.toBase58().slice(-4)} [CONNECTED]` : (connecting ? 'CONNECTING...' : 'SELECT WALLET')}
+                </button>
 
                 {(connected || connecting) && (
                     <button
