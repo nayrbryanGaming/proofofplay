@@ -1,6 +1,7 @@
 "use client";
 
 import { useWallet, useAnchorWallet, useConnection } from "@solana/wallet-adapter-react";
+import { Program, AnchorProvider, web3, BN } from "@coral-xyz/anchor";
 import { useState, useEffect } from "react";
 import dynamic from "next/dynamic";
 const WalletMultiButton = dynamic(
