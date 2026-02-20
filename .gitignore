@@ -54,3 +54,4 @@ temp_solana_stable/
 
 # OS
 Thumbs.db
+.env*.local

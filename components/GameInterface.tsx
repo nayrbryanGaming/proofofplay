@@ -519,7 +519,6 @@ export default function GameInterface() {
             addLog(`❌ SYNC_FAILED: ${e.message}`);
         } finally {
             setLoading(null);
-            setLoading(null);
         }
     };
 
