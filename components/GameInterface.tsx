@@ -563,38 +563,16 @@ export default function GameInterface() {
 
             {/* Wallet Connect/Disconnect Group */}
             <div className="w-full max-w-md mb-6 relative z-10 flex flex-col gap-2">
-                <div className="flex flex-col gap-2 p-2 border border-[#00ff41] bg-black">
-                    <h3 className="text-xs text-yellow-400 font-bold uppercase text-center mb-1">:: SECURE WALLET LINK ::</h3>
-                    {!connected && (
-                        <button
-                            onClick={async () => {
-                                try {
-                                    const phantom = useWallet().wallets?.find(w => w.adapter.name === 'Phantom');
-                                    if (phantom) {
-                                        await useWallet().select(phantom.adapter.name);
-                                        await useWallet().connect();
-                                    } else {
-                                        addLog("Phantom wallet adapter not found");
-                                    }
-                                } catch (e: any) {
-                                    addLog(`Wallet Connect Error: ${e.name}`);
-                                }
-                            }}
-                            className="bg-purple-900 text-purple-300 font-bold text-lg py-3 w-full border-2 border-purple-500 hover:bg-purple-600 hover:text-white transition-all psg1-glow uppercase tracking-wide"
-                        >
-                            CONNECT PHANTOM WALLET
-                        </button>
-                    )}
-                    <WalletMultiButton className="!bg-[#00ff41] !text-black !font-bold !w-full !py-3 !text-lg !rounded-none !uppercase !tracking-widest hover:!scale-105 transition-transform !border-2 !border-[#00ff41]" />
-                    {(connected || connecting) && (
-                        <button
-                            onClick={disconnect}
-                            className="bg-red-900/40 text-red-500 border-2 border-red-500 w-full py-3 text-lg font-bold uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all duration-200 psg1-glow shadow-[0_0_10px_rgba(255,0,0,0.3)]"
-                        >
-                            {connecting ? "CANCEL / CHANGE_WALLET" : "DISCONNECT_WALLET"}
-                        </button>
-                    )}
-                </div>
+                <WalletMultiButton className="!bg-[#00ff41] !text-black !font-bold !w-full !py-3 !text-lg !rounded-none !uppercase !tracking-widest hover:!scale-105 transition-transform !border-2 !border-[#00ff41]" />
+
+                {(connected || connecting) && (
+                    <button
+                        onClick={disconnect}
+                        className="bg-red-900/40 text-red-500 border-2 border-red-500 w-full py-3 text-lg font-bold uppercase tracking-widest hover:bg-red-600 hover:text-white transition-all duration-200 psg1-glow shadow-[0_0_10px_rgba(255,0,0,0.3)]"
+                    >
+                        {connecting ? "CANCEL / CHANGE_WALLET" : "DISCONNECT_WALLET"}
+                    </button>
+                )}
             </div>
 
             {/* Status Panel */}
