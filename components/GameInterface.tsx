@@ -58,13 +58,6 @@ export default function GameInterface() {
     // Hydration guard
     useEffect(() => {
         setMounted(true);
-        // Polyfill Buffer for Solana compatibility
-        if (typeof window !== 'undefined' && !window.Buffer) {
-            import('buffer').then(module => {
-                // @ts-ignore
-                window.Buffer = module.Buffer;
-            }).catch(e => console.error("Buffer polyfill failed", e));
-        }
     }, []);
 
     // --- Step 8.5: Metadata Explanation ---
