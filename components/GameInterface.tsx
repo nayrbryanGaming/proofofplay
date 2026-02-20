@@ -167,7 +167,7 @@ export default function GameInterface() {
         return pda;
     };
 
-    // ... (lines 113-160 remain unchanged)
+
 
     // --- REAL-TIME: Subscribe to Account Changes ---
     useEffect(() => {
