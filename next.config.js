@@ -11,6 +11,21 @@ const nextConfig = {
         unoptimized: true,
         domains: ['arweave.net', 'shdw-drive.genesysgo.net'],
     },
+    webpack: (config) => {
+        config.resolve.fallback = {
+            ...config.resolve.fallback,
+            fs: false,
+            os: false,
+            path: false,
+            crypto: false,
+        };
+        config.plugins.push(
+            new (require('webpack')).ProvidePlugin({
+                Buffer: ['buffer', 'Buffer'],
+            })
+        );
+        return config;
+    },
 };
 
 module.exports = nextConfig;
