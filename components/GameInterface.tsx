@@ -58,6 +58,8 @@ export default function GameInterface() {
     // Hydration guard
     useEffect(() => {
         setMounted(true);
+        console.log("GameInterface Mounted. System Ready.");
+        addLog("🛡️ SHIELD_STATUS: ACTIVE | SYSTEM_READY");
     }, []);
 
     // --- Step 8.5: Metadata Explanation ---
@@ -66,39 +68,45 @@ export default function GameInterface() {
 
     // Initialize Anchor Program
     useEffect(() => {
-        if (!anchorWallet) return;
+        if (!anchorWallet) {
+            console.log("No anchor wallet connected.");
+            return;
+        }
         const provider = new AnchorProvider(connection, anchorWallet, AnchorProvider.defaultOptions());
         try {
-            const programIdStr = process.env.NEXT_PUBLIC_PROGRAM_ID || "3q31CJ8wMEDVjtfgZXnyEskzZ17yCmTj2p7MKkSKqiEJ";
+            const programIdStr = process.env.NEXT_PUBLIC_PROGRAM_ID || "hirTPHnA6on8w2ATUku2bKJST2wqhdY5CdWt8SS7d93";
             // Check if string is at least somewhat valid before parsing
-            if (programIdStr.length < 32) throw new Error("Invalid program ID length");
+            if (programIdStr.length < 32 || programIdStr.includes(" ")) throw new Error("Invalid program ID format");
 
             const programId = new web3.PublicKey(programIdStr);
             // @ts-ignore - IDL type mismatch is common in Anchor 0.29+
             const prog = new Program(idl, programId, provider);
             setProgram(prog);
-        } catch (e) {
+            addLog(`✅ ATTACHED_TO_PROGRAM: ${programIdStr.slice(0, 8)}...`);
+        } catch (e: any) {
             console.error("Failed to initialize program. Invalid Program ID:", e);
-            // Don't set program so the UI gracefully shows loading or disabled state instead of crashing
+            addLog(`❌ PROGRAM_ERROR: ${e.message}`);
         }
     }, [anchorWallet, connection]);
 
     // Mock generic NFT fetch on load for demo purposes
-    // In reality, we would scan the wallet for a specific collection mint
     useEffect(() => {
         if (!connection || !anchorWallet) return;
         const demoMint = process.env.NEXT_PUBLIC_EQUIP_MINT ?? "MINT_ADDRESS_HERE";
-        if (demoMint === "MINT_ADDRESS_HERE") {
-            addLog("No equip mint set. Set NEXT_PUBLIC_EQUIP_MINT to auto-equip a test NFT.");
+        if (!demoMint || demoMint === "MINT_ADDRESS_HERE") {
             return;
         }
         const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://api.devnet.solana.com";
-        fetchNftStats(rpcEndpoint, demoMint).then(stats => {
-            if (stats) {
-                setEquippedItem(stats);
-                addLog(`Loaded Item: ${stats.name}`);
-            }
-        });
+        try {
+            fetchNftStats(rpcEndpoint, demoMint).then(stats => {
+                if (stats) {
+                    setEquippedItem(stats);
+                    addLog(`🛡️ Loaded Item: ${stats.name}`);
+                }
+            }).catch(e => console.log("Silent NFT fetch fail", e));
+        } catch (e) {
+            console.log("NFT Fetch skipped - invalid mint address");
+        }
     }, [connection, anchorWallet]);
 
     // Helper: Fetch player account with retry
