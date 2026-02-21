@@ -103,20 +103,6 @@ export default function GameInterface() {
         checkNetwork();
     }, [connection, anchorWallet]);
 
-    const addLog = (msg: string) => {
-        let finalMsg = msg;
-        if (msg.toLowerCase().includes("network mismatch") || msg.toLowerCase().includes("blockhash")) {
-            finalMsg = "⚠️ WRONG NETWORK! Please switch your wallet to DEVNET.";
-        }
-        if (msg.toLowerCase().includes("0x1") || msg.includes("attempt to debit an account but found no record")) {
-            finalMsg = "⚠️ INSUFFICIENT SOL! You need Devnet SOL to play.";
-        }
-        setLogs((prev) => {
-            const newLogs = [...prev, `[${new Date().toLocaleTimeString()}] ${finalMsg}`];
-            return newLogs.slice(-50); // CAP LOGS at 50 to prevent memory leak
-        });
-    };
-
     // --- Step 8.5: Metadata Explanation ---
     // We fetch metadata from the connected wallet's NFT (mocked mint for demo)
     const [equippedItem, setEquippedItem] = useState<{ name: string, atk: number, image?: string } | null>(null);
@@ -198,20 +184,6 @@ export default function GameInterface() {
             console.error('Confirmation error:', e);
             return false;
         }
-    };
-
-    const addLog = (msg: string) => {
-        let finalMsg = msg;
-        if (msg.toLowerCase().includes("network mismatch") || msg.toLowerCase().includes("blockhash")) {
-            finalMsg = "⚠️ WRONG NETWORK! Please switch your wallet to DEVNET.";
-        }
-        if (msg.toLowerCase().includes("0x1") || msg.includes("attempt to debit an account but found no record")) {
-            finalMsg = "⚠️ INSUFFICIENT SOL! You need Devnet SOL to play.";
-        }
-        setLogs((prev) => {
-            const newLogs = [...prev, `[${new Date().toLocaleTimeString()}] ${finalMsg}`];
-            return newLogs.slice(-50); // CAP LOGS at 50 to prevent memory leak
-        });
     };
 
     // --- Step 3.2: Balance Check & Airdrop ---
