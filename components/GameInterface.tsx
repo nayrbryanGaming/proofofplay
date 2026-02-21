@@ -151,7 +151,7 @@ export default function GameInterface() {
             // @ts-ignore - IDL type mismatch is common in Anchor 0.29+
             const prog = new Program(idl, programId, provider);
             setProgram(prog);
-            addLog(`✅ ATTACHED_TO_PROGRAM: ${programId.toString().slice(0, 8)}... (NUCLEAR_FIXED)`);
+            addLog(`✅ ATTACHED_TO_PROGRAM: ${programId.toString().slice(0, 8)}... (FINAL_RESCUE_V4)`);
         } catch (e: any) {
             console.error("Failed to initialize program. Invalid Program ID:", e);
             addLog(`❌ PROGRAM_ERROR: ${e.message}`);
