@@ -99,16 +99,25 @@ export default function GameInterface() {
 
         const checkNetwork = async () => {
             try {
-                // Check if current connected cluster matches our Devnet expectation
                 const genesis = await connection.getGenesisHash();
-                const devnetGenesis = 'EtWTRABG3VvSndqJbrXsiXWq++9y5B1Xm9x2fndGDf9I'; // Simplified check placeholder
-                // In practice, we just check if RPC endpoint is Devnet
+                const devnetGenesis = 'EtWTRABG3VvSndqJbrXsiXWq++9y5B1Xm9x2fndGDf9I';
+                const mainnetGenesis = '5eyhaS9RaMkWtR4Gd6z7H8Q46v8Hbe9X5pU9oBvY44';
+
                 const url = connection.rpcEndpoint.toLowerCase();
-                if (url.includes('testnet')) {
+                const isMainnet = genesis === mainnetGenesis || url.includes('mainnet');
+                const isTestnet = url.includes('testnet');
+
+                if (isMainnet || isTestnet) {
                     setNetworkMismatch(true);
-                    addLog("⚠️ NETWORK MISMATCH: Your wallet/RPC is on TESTNET. Please switch to DEVNET.");
+                    const netName = isMainnet ? "MAINNET" : "TESTNET";
+                    addLog(`⚠️ NETWORK MISMATCH: Your wallet is on ${netName}. Please switch to DEVNET.`);
                 } else {
                     setNetworkMismatch(false);
+                }
+
+                if (anchorWallet?.publicKey) {
+                    addLog(`👤 CONNECTED_ADDRESS: ${anchorWallet.publicKey.toString().slice(0, 8)}...`);
+                    addLog(`🌐 NETWORK_GENESIS: ${genesis.slice(0, 8)}...`);
                 }
             } catch (e) {
                 console.error("Network check failed", e);
@@ -624,9 +633,12 @@ export default function GameInterface() {
                 </h1>
 
                 {networkMismatch && (
-                    <div className="w-full bg-red-600 text-white text-[10px] font-bold py-1 px-4 mb-2 animate-pulse flex justify-between items-center border-2 border-white">
-                        <span>⚠️ NETWORK MISMATCH: PHANTOM IS ON TESTNET</span>
-                        <span className="underline cursor-pointer" onClick={() => window.open('https://docs.phantom.app/developer-powertools/developer-settings', '_blank')}>FIX</span>
+                    <div className="w-full bg-red-600 text-white text-[10px] font-bold py-1 px-4 mb-2 animate-pulse flex flex-col items-center border-2 border-white">
+                        <div className="flex justify-between w-full items-center">
+                            <span>⚠️ NETWORK MISMATCH: WALLET IS ON WRONG NETWORK</span>
+                            <span className="underline cursor-pointer" onClick={() => window.open('https://docs.phantom.app/developer-powertools/developer-settings', '_blank')}>FIX</span>
+                        </div>
+                        <div className="text-[8px] opacity-80">PLEASE SWITCH TO DEVNET IN YOUR WALLET SETTINGS</div>
                     </div>
                 )}
 
@@ -675,9 +687,8 @@ export default function GameInterface() {
                 <h2 className="text-lg font-bold mb-2 border-b border-[#00ff41] pb-1 text-yellow-400">:: PLAYER_STATUS ::</h2>
                 <div className="grid grid-cols-2 gap-2 text-sm">
                     <p>LEVEL: <span className="text-white font-bold">{gameState?.level ?? '---'}</span></p>
-                    <p>HP: <span className="text-white">{gameState?.hp ?? '---'}</span></p>
-                    <p>ATK: <span className="text-white">{gameState?.atk ?? '---'}</span></p>
-                    <p>DEF: <span className="text-white">{gameState?.def ?? '---'}</span></p>
+                    <p>TOTAL HP: <span className="text-white">{gameState?.hp ?? '---'}</span></p>
+                    <p>ADR: <span className="text-white text-[8px]">{anchorWallet?.publicKey.toString().slice(0, 4)}...{anchorWallet?.publicKey.toString().slice(-4)}</span></p>
                     <p className="col-span-2">REWARD: <span className={gameState?.canClaim ? "text-yellow-400 font-bold blink" : "text-gray-500"}>{gameState?.canClaim ? 'AVAILABLE' : 'LOCKED'}</span></p>
                     {balance < 0.5 && (
                         <button
