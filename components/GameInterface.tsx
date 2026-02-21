@@ -138,7 +138,10 @@ export default function GameInterface() {
         }
         const provider = new AnchorProvider(connection, anchorWallet, AnchorProvider.defaultOptions());
         try {
-            const programIdStr = process.env.NEXT_PUBLIC_PROGRAM_ID || "hirTPHnA6on8w2ATUku2bKJST2wqhdY5CdWt8SS7d93";
+            // NUCLEAR FORCE: Hard-locking to the CONFIRMED ACTIVE on-chain Program ID
+            const programIdStr = "hirTPHnA6on8w2ATUku2bKJST2wqhdY5CdWt8SS7d93";
+            console.log(`NUCLEAR_FORCE: Active Program ID: ${programIdStr}`);
+
             const programId = safePublicKey(programIdStr);
 
             if (!programId) {
@@ -148,7 +151,7 @@ export default function GameInterface() {
             // @ts-ignore - IDL type mismatch is common in Anchor 0.29+
             const prog = new Program(idl, programId, provider);
             setProgram(prog);
-            addLog(`✅ ATTACHED_TO_PROGRAM: ${programId.toString().slice(0, 8)}...`);
+            addLog(`✅ ATTACHED_TO_PROGRAM: ${programId.toString().slice(0, 8)}... (NUCLEAR_FIXED)`);
         } catch (e: any) {
             console.error("Failed to initialize program. Invalid Program ID:", e);
             addLog(`❌ PROGRAM_ERROR: ${e.message}`);
@@ -447,26 +450,40 @@ export default function GameInterface() {
             }
 
             else if (action === 'fight') {
-                // Mock Combat Math (Simple)
-                if (gameState.lastEvent.every(b => b === 0)) {
+                // Determine Monster Stats from Hash (matching lib.rs)
+                const hash = gameState.lastEvent;
+                if (hash.every(b => b === 0)) {
                     addLog("❌ [DEMO] Explore first!");
                     setLoading(null);
                     return;
                 }
-                const playerDmg = Math.max(1, gameState.atk - 5); // Assumed monster def 5
-                const monsterDmg = Math.max(1, 15 - gameState.def); // Assumed monster atk 15
-                const hpLoss = monsterDmg * 2; // Simulate 2 rounds
 
-                newState.hp = Math.max(0, newState.hp - hpLoss);
-                newState.lastEvent = Array(32).fill(0); // Reset event
+                const monster_hp = (hash[0] % 30) + 20 + (gameState.level * 5);
+                const monster_atk = (hash[1] % 10) + 5 + (gameState.level * 2);
+                const monster_def = (hash[2] % 5) + Math.floor(gameState.level / 2);
 
-                if (newState.hp > 0) {
+                addLog(`⚔️ [DEMO] Monster Stats - HP: ${monster_hp}, ATK: ${monster_atk}, DEF: ${monster_def}`);
+
+                const playerDmg = Math.max(1, gameState.atk - monster_def);
+                const monsterDmg = Math.max(1, monster_atk - gameState.def);
+
+                const roundsToKill = Math.ceil(monster_hp / playerDmg);
+                const roundsToDie = Math.ceil(gameState.hp / monsterDmg);
+
+                if (roundsToKill <= roundsToDie) {
+                    // Victory
+                    const damageTaken = (roundsToKill - 1) * monsterDmg;
+                    newState.hp = Math.max(0, gameState.hp - damageTaken);
                     newState.level += 1;
                     newState.canClaim = true;
-                    addLog(`🎁 [DEMO] VICTORY! Level ${newState.level} reached.`);
+                    newState.lastEvent = Array(32).fill(0);
+                    addLog(`🎁 [DEMO] VICTORY! Level ${newState.level} reached. HP Left: ${newState.hp}`);
                 } else {
+                    // Defeat
                     newState.hp = 0;
-                    addLog(`💀 [DEMO] DEFEATED.`);
+                    newState.canClaim = false;
+                    newState.lastEvent = Array(32).fill(0);
+                    addLog(`💀 [DEMO] DEFEATED at level ${gameState.level}.`);
                 }
             }
 
