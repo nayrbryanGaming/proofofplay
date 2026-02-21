@@ -68,10 +68,19 @@ export default function GameInterface() {
     useEffect(() => {
         if (!anchorWallet) return;
         const provider = new AnchorProvider(connection, anchorWallet, AnchorProvider.defaultOptions());
-        const programId = new web3.PublicKey(process.env.NEXT_PUBLIC_PROGRAM_ID ?? "3q31CJ8wMEDVjtfgZXnyEskzZ17yCmTj2p7MKkSKqiEJ");
-        // @ts-ignore - IDL type mismatch is common in Anchor 0.29+
-        const prog = new Program(idl, programId, provider);
-        setProgram(prog);
+        try {
+            const programIdStr = process.env.NEXT_PUBLIC_PROGRAM_ID || "3q31CJ8wMEDVjtfgZXnyEskzZ17yCmTj2p7MKkSKqiEJ";
+            // Check if string is at least somewhat valid before parsing
+            if (programIdStr.length < 32) throw new Error("Invalid program ID length");
+
+            const programId = new web3.PublicKey(programIdStr);
+            // @ts-ignore - IDL type mismatch is common in Anchor 0.29+
+            const prog = new Program(idl, programId, provider);
+            setProgram(prog);
+        } catch (e) {
+            console.error("Failed to initialize program. Invalid Program ID:", e);
+            // Don't set program so the UI gracefully shows loading or disabled state instead of crashing
+        }
     }, [anchorWallet, connection]);
 
     // Mock generic NFT fetch on load for demo purposes
