@@ -5,7 +5,7 @@ const nextConfig = {
     env: {
         NEXT_PUBLIC_RPC_ENDPOINT: process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://api.devnet.solana.com",
         NEXT_PUBLIC_PROGRAM_ID: process.env.NEXT_PUBLIC_PROGRAM_ID || "hirTPHnA6on8w2ATUku2bKJST2wqhdY5CdWt8SS7d93",
-        NEXT_PUBLIC_EQUIP_MINT: process.env.NEXT_PUBLIC_EQUIP_MINT || "9Yy3j1P9jK2FqXq3U1Jv3n9Yy3j1P9jK2FqXq3U1Jv3", // Placeholder for demo
+        NEXT_PUBLIC_EQUIP_MINT: process.env.NEXT_PUBLIC_EQUIP_MINT || "MINT_ADDRESS_HERE",
     },
     images: {
         unoptimized: true,

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import AppWalletProvider from "../components/AppWalletProvider";
+import { ErrorBoundary } from "../components/ErrorBoundary";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -21,9 +22,11 @@ export default function RootLayout({
         <meta name="theme-color" content="#00ff41" />
       </head>
       <body className={inter.className}>
-        <AppWalletProvider>
-          {children}
-        </AppWalletProvider>
+        <ErrorBoundary>
+          <AppWalletProvider>
+            {children}
+          </AppWalletProvider>
+        </ErrorBoundary>
       </body>
     </html>
   );
