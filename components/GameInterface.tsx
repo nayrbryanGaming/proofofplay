@@ -643,9 +643,9 @@ export default function GameInterface() {
 
             <div className="w-full max-w-md mb-6 flex flex-col items-center">
                 <h1 className="text-2xl sm:text-3xl font-bold text-center tracking-widest drop-shadow-[0_0_10px_rgba(0,255,65,0.8)] border-b-2 border-[#00ff41] w-full pb-2 mb-2">
-                    <h1 className="text-4xl md:text-6xl font-black mb-2 tracking-[0.2em] text-transparent bg-clip-text bg-gradient-to-b from-[#00ff41] to-[#008f11] drop-shadow-[0_0_15px_rgba(0,255,65,0.5)]">
-                        PROOF_OF_PLAY <span className="text-sm align-top opacity-50">[V5_STABLE]</span>
-                    </h1>
+                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff41] to-blue-500">
+                        PROOF_OF_PLAY <span className="text-xs align-top opacity-50">[V5_STABLE]</span>
+                    </span>
                     <span className="block text-sm sm:text-lg text-[#00ff41]">DUNGEON_ETERNAL</span>
                 </h1>
 
