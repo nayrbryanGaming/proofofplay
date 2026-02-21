@@ -72,6 +72,20 @@ export default function GameInterface() {
     const [mounted, setMounted] = useState(false);
     const [networkMismatch, setNetworkMismatch] = useState<boolean>(false);
 
+    const addLog = (msg: string) => {
+        let finalMsg = msg;
+        if (msg.toLowerCase().includes("network mismatch") || msg.toLowerCase().includes("blockhash")) {
+            finalMsg = "⚠️ WRONG NETWORK! Please switch your wallet to DEVNET.";
+        }
+        if (msg.toLowerCase().includes("0x1") || msg.includes("attempt to debit an account but found no record")) {
+            finalMsg = "⚠️ INSUFFICIENT SOL! You need Devnet SOL to play.";
+        }
+        setLogs((prev) => {
+            const newLogs = [...prev, `[${new Date().toLocaleTimeString()}] ${finalMsg}`];
+            return newLogs.slice(-50); // CAP LOGS at 50 to prevent memory leak
+        });
+    };
+
     // Hydration guard
     useEffect(() => {
         setMounted(true);
