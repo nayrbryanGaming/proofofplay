@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { ConnectionProvider, WalletProvider } from "@solana/wallet-adapter-react";
 import { WalletModalProvider } from "@solana/wallet-adapter-react-ui";
 import {
@@ -17,11 +17,20 @@ import "@solana/wallet-adapter-react-ui/styles.css";
 import "../app/globals.css";
 
 export default function AppWalletProvider({ children }: { children: React.ReactNode }) {
+    // Explicitly polyfill window.Buffer here because Webpack ProvidePlugin might not mount it to window
+    useEffect(() => {
+        if (typeof window !== "undefined") {
+            import("buffer").then(({ Buffer }) => {
+                window.Buffer = window.Buffer || Buffer;
+            });
+        }
+    }, []);
+
     const endpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://api.devnet.solana.com";
 
     const wallets = useMemo(
         () => [
-            new PhantomWalletAdapter(),
+            new PhantomWalletAdapter({}),
             new SolflareWalletAdapter(),
             new TrustWalletAdapter(),
             new CoinbaseWalletAdapter(),
@@ -33,7 +42,7 @@ export default function AppWalletProvider({ children }: { children: React.ReactN
 
     return (
         <ConnectionProvider endpoint={endpoint}>
-            <WalletProvider wallets={wallets} autoConnect={false}>
+            <WalletProvider wallets={wallets} autoConnect={true}>
                 <WalletModalProvider>{children}</WalletModalProvider>
             </WalletProvider>
         </ConnectionProvider>
