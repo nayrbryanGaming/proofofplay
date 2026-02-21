@@ -19,7 +19,13 @@ export const DiagnosticPanel = () => {
             const programIdStr = process.env.NEXT_PUBLIC_PROGRAM_ID;
             let programId: PublicKey;
             try {
-                programId = new PublicKey(programIdStr || "11111111111111111111111111111111");
+                const sanitized = (programIdStr || "").trim();
+                // Base58 regex check
+                if (!sanitized || !/^[1-9A-HJ-NP-Za-km-z]+$/.test(sanitized)) {
+                    programId = PublicKey.default;
+                } else {
+                    programId = new PublicKey(sanitized);
+                }
             } catch {
                 programId = PublicKey.default;
             }

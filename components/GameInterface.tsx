@@ -30,6 +30,22 @@ import { fetchNftStats } from "../utils/metaplex";
 import { txHistory } from "../utils/transactionHistory";
 
 
+// --- Extreme Safety Utility ---
+const safePublicKey = (str: string | undefined): web3.PublicKey | null => {
+    if (!str) return null;
+    const sanitized = str.trim();
+    // Base58 regex: 1-9, A-H, J-N, P-Z, a-k, m-z (No 0, O, I, l)
+    const base58Regex = /^[1-9A-HJ-NP-Za-km-z]+$/;
+    if (!sanitized || sanitized.length < 32 || sanitized.length > 44 || !base58Regex.test(sanitized)) {
+        return null;
+    }
+    try {
+        return new web3.PublicKey(sanitized);
+    } catch {
+        return null;
+    }
+};
+
 // --- Step 7.5: Enforce PSG1 Style ---
 // Mobile-first (w-full max-w-md), Portrait layout, Large Buttons (p-4 text-xl)
 interface PlayerAccount {
@@ -54,6 +70,7 @@ export default function GameInterface() {
     const [showVisuals, setShowVisuals] = useState<boolean>(false);
     const [isSimulationMode, setIsSimulationMode] = useState<boolean>(false);
     const [mounted, setMounted] = useState(false);
+    const [networkMismatch, setNetworkMismatch] = useState<boolean>(false);
 
     // Hydration guard
     useEffect(() => {
@@ -61,6 +78,44 @@ export default function GameInterface() {
         console.log("GameInterface Mounted. System Ready.");
         addLog("🛡️ SHIELD_STATUS: ACTIVE | SYSTEM_READY");
     }, []);
+
+    // Network & Balance Monitor
+    useEffect(() => {
+        if (!connection || !anchorWallet) return;
+
+        const checkNetwork = async () => {
+            try {
+                // Check if current connected cluster matches our Devnet expectation
+                const genesis = await connection.getGenesisHash();
+                const devnetGenesis = 'EtWTRABG3VvSndqJbrXsiXWq++9y5B1Xm9x2fndGDf9I'; // Simplified check placeholder
+                // In practice, we just check if RPC endpoint is Devnet
+                const url = connection.rpcEndpoint.toLowerCase();
+                if (url.includes('testnet')) {
+                    setNetworkMismatch(true);
+                    addLog("⚠️ NETWORK MISMATCH: Your wallet/RPC is on TESTNET. Please switch to DEVNET.");
+                } else {
+                    setNetworkMismatch(false);
+                }
+            } catch (e) {
+                console.error("Network check failed", e);
+            }
+        };
+        checkNetwork();
+    }, [connection, anchorWallet]);
+
+    const addLog = (msg: string) => {
+        let finalMsg = msg;
+        if (msg.toLowerCase().includes("network mismatch") || msg.toLowerCase().includes("blockhash")) {
+            finalMsg = "⚠️ WRONG NETWORK! Please switch your wallet to DEVNET.";
+        }
+        if (msg.toLowerCase().includes("0x1") || msg.includes("attempt to debit an account but found no record")) {
+            finalMsg = "⚠️ INSUFFICIENT SOL! You need Devnet SOL to play.";
+        }
+        setLogs((prev) => {
+            const newLogs = [...prev, `[${new Date().toLocaleTimeString()}] ${finalMsg}`];
+            return newLogs.slice(-50); // CAP LOGS at 50 to prevent memory leak
+        });
+    };
 
     // --- Step 8.5: Metadata Explanation ---
     // We fetch metadata from the connected wallet's NFT (mocked mint for demo)
@@ -75,14 +130,16 @@ export default function GameInterface() {
         const provider = new AnchorProvider(connection, anchorWallet, AnchorProvider.defaultOptions());
         try {
             const programIdStr = process.env.NEXT_PUBLIC_PROGRAM_ID || "hirTPHnA6on8w2ATUku2bKJST2wqhdY5CdWt8SS7d93";
-            // Check if string is at least somewhat valid before parsing
-            if (programIdStr.length < 32 || programIdStr.includes(" ")) throw new Error("Invalid program ID format");
+            const programId = safePublicKey(programIdStr);
 
-            const programId = new web3.PublicKey(programIdStr);
+            if (!programId) {
+                throw new Error(`Invalid Program ID String: "${programIdStr}"`);
+            }
+
             // @ts-ignore - IDL type mismatch is common in Anchor 0.29+
             const prog = new Program(idl, programId, provider);
             setProgram(prog);
-            addLog(`✅ ATTACHED_TO_PROGRAM: ${programIdStr.slice(0, 8)}...`);
+            addLog(`✅ ATTACHED_TO_PROGRAM: ${programId.toString().slice(0, 8)}...`);
         } catch (e: any) {
             console.error("Failed to initialize program. Invalid Program ID:", e);
             addLog(`❌ PROGRAM_ERROR: ${e.message}`);
@@ -92,13 +149,16 @@ export default function GameInterface() {
     // Mock generic NFT fetch on load for demo purposes
     useEffect(() => {
         if (!connection || !anchorWallet) return;
-        const demoMint = process.env.NEXT_PUBLIC_EQUIP_MINT ?? "MINT_ADDRESS_HERE";
-        if (!demoMint || demoMint === "MINT_ADDRESS_HERE") {
+        const demoMintStr = process.env.NEXT_PUBLIC_EQUIP_MINT ?? "MINT_ADDRESS_HERE";
+        const demoMint = safePublicKey(demoMintStr);
+
+        if (!demoMint) {
             return;
         }
+
         const rpcEndpoint = process.env.NEXT_PUBLIC_RPC_ENDPOINT || "https://api.devnet.solana.com";
         try {
-            fetchNftStats(rpcEndpoint, demoMint).then(stats => {
+            fetchNftStats(rpcEndpoint, demoMint.toString()).then(stats => {
                 if (stats) {
                     setEquippedItem(stats);
                     addLog(`🛡️ Loaded Item: ${stats.name}`);
@@ -576,6 +636,13 @@ export default function GameInterface() {
                     </span>
                     <span className="block text-sm sm:text-lg text-[#00ff41]">DUNGEON_ETERNAL</span>
                 </h1>
+
+                {networkMismatch && (
+                    <div className="w-full bg-red-600 text-white text-[10px] font-bold py-1 px-4 mb-2 animate-pulse flex justify-between items-center border-2 border-white">
+                        <span>⚠️ NETWORK MISMATCH: PHANTOM IS ON TESTNET</span>
+                        <span className="underline cursor-pointer" onClick={() => window.open('https://docs.phantom.app/developer-powertools/developer-settings', '_blank')}>FIX</span>
+                    </div>
+                )}
 
                 <div className="w-full flex justify-between items-end px-2">
                     <span className="text-[10px] text-[#00ff41] font-bold tracking-tighter opacity-80 uppercase flex items-center gap-1">
