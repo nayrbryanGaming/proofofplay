@@ -11,7 +11,6 @@ echo.
 echo   DO NOT CLOSE THIS WINDOW.
 echo   IT WILL OPEN THE WEBSITE AUTOMATICALLY WHEN DONE.
 echo.
-cd app
-call npx vercel deploy out --prod --yes
+call npx vercel deploy --prod --yes
 pause
 

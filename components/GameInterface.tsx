@@ -644,20 +644,26 @@ export default function GameInterface() {
             <div className="w-full max-w-md mb-6 flex flex-col items-center">
                 <h1 className="text-2xl sm:text-3xl font-bold text-center tracking-widest drop-shadow-[0_0_10px_rgba(0,255,65,0.8)] border-b-2 border-[#00ff41] w-full pb-2 mb-2">
                     <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff41] to-blue-500">
-                        PROOF_OF_PLAY <span className="text-xs align-top opacity-50">[V5_STABLE]</span>
+                        PROOF_OF_PLAY <span className="text-xs align-top opacity-50">[V6_STABLE]</span>
                     </span>
                     <span className="block text-sm sm:text-lg text-[#00ff41]">DUNGEON_ETERNAL</span>
                 </h1>
 
-                {networkMismatch && (
-                    <div className="w-full bg-red-600 text-white text-[10px] font-bold py-1 px-4 mb-2 animate-pulse flex flex-col items-center border-2 border-white">
-                        <div className="flex justify-between w-full items-center">
-                            <span>⚠️ NETWORK MISMATCH: WALLET IS ON WRONG NETWORK</span>
-                            <span className="underline cursor-pointer" onClick={() => window.open('https://docs.phantom.app/developer-powertools/developer-settings', '_blank')}>FIX</span>
-                        </div>
-                        <div className="text-[8px] opacity-80">PLEASE SWITCH TO DEVNET IN YOUR WALLET SETTINGS</div>
+                {(!anchorWallet) ? (
+                    <div className="w-full bg-blue-900 border-2 border-white text-white p-3 mb-4 text-center animate-pulse">
+                        <p className="font-bold">SYSTEM_LOCKED: WALLET_REQUIRED</p>
+                        <p className="text-[10px]">PLEASE_SELECT_PHANTOM_OR_SOLFLARE</p>
                     </div>
-                )}
+                ) : (networkMismatch || (window.solana && window.solana.isPhantom && !window.solana.isConnected)) ? (
+                    <div className="w-full bg-red-600 text-white text-[10px] font-bold py-2 px-4 mb-4 animate-pulse flex flex-col items-center border-2 border-white">
+                        <p className="text-xs mb-1">⚠️ PHANTOM: WRONG NETWORK (DEVNET REQUIRED)</p>
+                        <p className="mb-2">Go to Phantom Settings &gt; Developer Settings &gt; Devnet</p>
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="bg-white text-black px-4 py-1 text-[8px] uppercase font-black"
+                        >RE-SYNC SYSTEM</button>
+                    </div>
+                ) : null}
 
                 <div className="w-full flex justify-between items-end px-2">
                     <span className="text-[10px] text-[#00ff41] font-bold tracking-tighter opacity-80 uppercase flex items-center gap-1">
@@ -730,6 +736,12 @@ export default function GameInterface() {
                     className="mt-3 w-full border border-[#00ff41] text-[#00ff41] px-3 py-1 text-xs hover:bg-[#00ff41] hover:text-black transition-colors uppercase disabled:opacity-50"
                 >
                     {loading === "refresh" ? "SYNCING..." : "FORCE_REFRESH_STATE"}
+                </button>
+                <button
+                    onClick={() => window.location.href = `/?v=${Date.now()}`}
+                    className="mt-2 w-full border border-red-500 text-red-500 px-3 py-1 text-[10px] hover:bg-red-500 hover:text-white transition-colors uppercase font-bold"
+                >
+                    ⚠️ FORCE_CLIENT_REBUILD (CLEAR_CACHE)
                 </button>
             </div>
 

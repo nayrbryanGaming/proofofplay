@@ -19,7 +19,7 @@ vercel login
 
 # Link to project
 echo "🔗 Linking to Vercel project..."
-cd app
+# Removed incorrect cd app
 vercel link
 
 # Set environment variables
@@ -28,11 +28,16 @@ vercel env add NEXT_PUBLIC_RPC_ENDPOINT production
 # When prompted, enter: https://api.devnet.solana.com
 
 vercel env add NEXT_PUBLIC_PROGRAM_ID production
-# When prompted, enter: 3QFQBFSLCAqenWMdTaj9HBHVCjJwzD19Wz9ELvSd5fmK
+# When prompted, enter: 3q31CJ8wMEDVjtfgZXnyEskzZ17yCmTj2p7MKkSKqiEJ
 
 # Deploy
 echo "🚀 Deploying to Vercel..."
-vercel --prod
+vercel --precho.
+echo   DO NOT CLOSE THIS WINDOW.
+echo   IT WILL OPEN THE WEBSITE AUTOMATICALLY WHEN DONE.
+echo.
+call npx vercel deploy --prod --yes
+pause
 
 echo ""
 echo "✅ DEPLOYMENT COMPLETE!"
