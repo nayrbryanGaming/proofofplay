@@ -25,10 +25,7 @@ yarn-debug.log*
 yarn-error.log*
 
 # Local env files
-.env.local
-.env.development.local
-.env.test.local
-.env.production.local
+# Pushing these as requested by user for rescue
 
 # Vercel
 .vercel
