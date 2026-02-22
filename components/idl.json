@@ -3,7 +3,7 @@
   "name": "proof_of_play",
   "instructions": [
     {
-      "name": "initPlayer",
+      "name": "init_player",
       "accounts": [
         {
           "name": "player",
