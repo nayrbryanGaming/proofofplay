@@ -361,7 +361,7 @@ export default function GameInterface() {
             if (!pda) throw new Error("PDA calculation failed");
 
             const tx = await program.methods
-                .init_player()
+                .initPlayer()
                 .accounts({
                     player: pda,
                     authority: anchorWallet.publicKey,
