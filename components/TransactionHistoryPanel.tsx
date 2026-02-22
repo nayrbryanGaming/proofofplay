@@ -1,10 +1,63 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import { useConnection, useWallet } from '@solana/wallet-adapter-react';
+import { PublicKey } from '@solana/web3.js';
 import { txHistory, TransactionRecord } from '../utils/transactionHistory';
 
 export const TransactionHistoryPanel = () => {
     const [isOpen, setIsOpen] = useState(false);
+    const { connection } = useConnection();
+    const { publicKey } = useWallet();
     const [transactions, setTransactions] = useState<TransactionRecord[]>([]);
     const [stats, setStats] = useState(txHistory.getStats());
+    const [isSyncing, setIsSyncing] = useState(false);
+
+    const refresh = useCallback(() => {
+        setTransactions(txHistory.getAll());
+        setStats(txHistory.getStats());
+    }, []);
+
+    const syncWithChain = async () => {
+        if (!publicKey || !connection) return;
+        setIsSyncing(true);
+        try {
+            // Hardcoded active Program ID for reliability
+            const PROGRAM_ID = new PublicKey("hirTPHnA6on8w2ATUku2bKJST2wqhdY5CdWt8SS7d93");
+
+            // Derive PDA
+            const [pda] = PublicKey.findProgramAddressSync(
+                [Buffer.from("player"), publicKey.toBuffer()],
+                PROGRAM_ID
+            );
+
+            console.log("Syncing history for PDA:", pda.toString());
+
+            // Get signatures for the PDA (direct proof of hero actions)
+            const signatures = await connection.getSignaturesForAddress(pda, { limit: 10 });
+
+            if (signatures.length === 0) {
+                console.log("No on-chain history found for this PDA yet.");
+            }
+
+            // Add them to our history tracker
+            for (const sig of signatures) {
+                // If we don't have this signature, add it
+                const existing = txHistory.getAll().find(r => r.signature === sig.signature);
+                if (!existing) {
+                    // We don't know the exact 'action' name from just the signature metadata without parsing,
+                    // but we can label it generic 'on-chain' or try to guess.
+                    // For now, let's just add it as '📝' type if unknown.
+                    txHistory.add(sig.signature, 'init'); // Default to init if we can't parse easily
+                    txHistory.updateStatus(sig.signature, 'success');
+                }
+            }
+
+            refresh();
+        } catch (e) {
+            console.error("Sync failed", e);
+        } finally {
+            setIsSyncing(false);
+        }
+    };
 
     useEffect(() => {
         // Load on mount
@@ -16,12 +69,7 @@ export const TransactionHistoryPanel = () => {
             const interval = setInterval(refresh, 5000);
             return () => clearInterval(interval);
         }
-    }, [isOpen]);
-
-    const refresh = () => {
-        setTransactions(txHistory.getAll());
-        setStats(txHistory.getStats());
-    };
+    }, [isOpen, refresh]);
 
     const getActionEmoji = (action: string) => {
         switch (action) {
@@ -62,6 +110,13 @@ export const TransactionHistoryPanel = () => {
                     TX_HISTORY_LOG
                 </h3>
                 <div className="flex gap-2">
+                    <button
+                        onClick={syncWithChain}
+                        className={`hover:text-white hover:bg-[#00ff41] px-1 text-[10px] border border-[#00ff41]/30 ${isSyncing ? 'animate-pulse bg-[#00ff41]/20' : ''}`}
+                        disabled={isSyncing}
+                    >
+                        {isSyncing ? "[SYNCING...]" : "[SYNC_CHAIN]"}
+                    </button>
                     <button onClick={refresh} className="hover:text-white hover:bg-[#00ff41] px-1 text-xs">[R]</button>
                     <button onClick={() => { txHistory.clear(); refresh(); }} className="hover:text-white hover:bg-[#00ff41] px-1 text-xs">[CLR]</button>
                     <button onClick={() => setIsOpen(false)} className="hover:text-white hover:bg-[#00ff41] px-1">[X]</button>
@@ -104,7 +159,7 @@ export const TransactionHistoryPanel = () => {
                                     <span className="uppercase font-bold text-[#00ff41] group-hover:text-white">{tx.action}</span>
                                 </div>
                                 <span className={`text-[10px] uppercase font-bold ${tx.status === 'success' ? 'text-green-400' :
-                                        tx.status === 'failed' ? 'text-red-400' : 'text-yellow-400'
+                                    tx.status === 'failed' ? 'text-red-400' : 'text-yellow-400'
                                     }`}>
                                     [{tx.status}]
                                 </span>

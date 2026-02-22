@@ -28,7 +28,7 @@ vercel env add NEXT_PUBLIC_RPC_ENDPOINT production
 # When prompted, enter: https://api.devnet.solana.com
 
 vercel env add NEXT_PUBLIC_PROGRAM_ID production
-# When prompted, enter: 3q31CJ8wMEDVjtfgZXnyEskzZ17yCmTj2p7MKkSKqiEJ
+# When prompted, enter: hirTPHnA6on8w2ATUku2bKJST2wqhdY5CdWt8SS7d93
 
 # Deploy
 echo "🚀 Deploying to Vercel..."

@@ -139,7 +139,7 @@ export default function GameInterface() {
         const provider = new AnchorProvider(connection, anchorWallet, AnchorProvider.defaultOptions());
         try {
             // NUCLEAR FORCE: Hard-locking to the CONFIRMED ACTIVE on-chain Program ID
-            const programIdStr = "hirTPHnA6on8w2ATUku2bKJST2wqhdY5CdWt8SS7d93";
+            const programIdStr = process.env.NEXT_PUBLIC_PROGRAM_ID || "hirTPHnA6on8w2ATUku2bKJST2wqhdY5CdWt8SS7d93";
             console.log(`NUCLEAR_FORCE: Active Program ID: ${programIdStr}`);
 
             const programId = safePublicKey(programIdStr);
@@ -151,7 +151,7 @@ export default function GameInterface() {
             // @ts-ignore - IDL type mismatch is common in Anchor 0.29+
             const prog = new Program(idl, programId, provider);
             setProgram(prog);
-            addLog(`✅ ATTACHED_TO_PROGRAM: ${programId.toString().slice(0, 8)}... (V5_STABLE)`);
+            addLog(`✅ ATTACHED_TO_PROGRAM: ${programId.toString().slice(0, 8)}... (FINAL_VERIFIED_V10)`);
         } catch (e: any) {
             console.error("Failed to initialize program. Invalid Program ID:", e);
             addLog(`❌ PROGRAM_ERROR: ${e.message}`);
@@ -642,12 +642,16 @@ export default function GameInterface() {
             <div className="scanline"></div>
 
             <div className="w-full max-w-md mb-6 flex flex-col items-center">
-                <h1 className="text-2xl sm:text-3xl font-bold text-center tracking-widest drop-shadow-[0_0_10px_rgba(0,255,65,0.8)] border-b-2 border-[#00ff41] w-full pb-2 mb-2">
-                    <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff41] to-blue-500">
-                        PROOF_OF_PLAY <span className="text-xs align-top opacity-50">[V6_STABLE]</span>
-                    </span>
-                    <span className="block text-sm sm:text-lg text-[#00ff41]">DUNGEON_ETERNAL</span>
-                </h1>
+                <div className="w-full border-b-2 border-[#00ff41] pb-2 mb-4 text-center flex flex-col items-center">
+                    <h1 className="text-3xl sm:text-4xl font-black tracking-[0.2em] drop-shadow-[0_0_15px_rgba(0,255,65,0.8)] leading-tight uppercase">
+                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-[#00ff41] via-blue-400 to-[#00ff41]">
+                            PROOF_OF_PLAY
+                        </span>
+                    </h1>
+                    <div className="text-xs sm:text-sm font-bold tracking-[0.5em] text-[#00ff41] opacity-80 mt-1 uppercase">
+                        DUNGEON_ETERNAL <span className="opacity-40 ml-2 font-mono">[FINAL_VERIFIED_V10]</span>
+                    </div>
+                </div>
 
                 {(!anchorWallet) ? (
                     <div className="w-full bg-blue-900 border-2 border-white text-white p-3 mb-4 text-center animate-pulse">
@@ -708,21 +712,39 @@ export default function GameInterface() {
             {/* Status Panel */}
             <div className="w-full max-w-md border-2 border-[#00ff41] p-4 mb-4 bg-black/80 backdrop-blur-sm shadow-[0_0_10px_rgba(0,255,65,0.1)] relative z-10">
                 <h2 className="text-lg font-bold mb-2 border-b border-[#00ff41] pb-1 text-yellow-400">:: PLAYER_STATUS ::</h2>
-                <div className="grid grid-cols-2 gap-2 text-sm">
-                    <p>LEVEL: <span className="text-white font-bold">{gameState?.level ?? '---'}</span></p>
-                    <p>TOTAL HP: <span className="text-white">{gameState?.hp ?? '---'}</span></p>
-                    <p>ADR: <span className="text-white text-[8px]">{anchorWallet?.publicKey.toString().slice(0, 4)}...{anchorWallet?.publicKey.toString().slice(-4)}</span></p>
-                    <p className="col-span-2">REWARD: <span className={gameState?.canClaim ? "text-yellow-400 font-bold blink" : "text-gray-500"}>{gameState?.canClaim ? 'AVAILABLE' : 'LOCKED'}</span></p>
-                    {balance < 0.5 && (
-                        <button
-                            onClick={requestAirdrop}
-                            disabled={loading === "airdrop"}
-                            className="col-span-2 mt-1 border border-yellow-500 text-yellow-500 text-xs py-1 hover:bg-yellow-500 hover:text-black transition-colors uppercase"
-                        >
-                            {loading === "airdrop" ? "REQUESTING..." : "⚠️ LOW BAL: REQUEST 1 SOL AIRDROP"}
-                        </button>
-                    )}
+
+                <div className="grid grid-cols-2 gap-x-6 gap-y-3 mt-2">
+                    <div className="flex flex-col border-l-2 border-[#00ff41] pl-2">
+                        <span className="text-[10px] text-gray-500 uppercase tracking-tighter">LVL_RANK</span>
+                        <span className="text-white font-black text-lg leading-none">{gameState?.level ?? '00'}</span>
+                    </div>
+                    <div className="flex flex-col border-l-2 border-[#00ff41] pl-2">
+                        <span className="text-[10px] text-gray-500 uppercase tracking-tighter">HP_POOL</span>
+                        <span className="text-white font-black text-lg leading-none">{gameState?.hp ?? '00'}</span>
+                    </div>
+                    <div className="col-span-2 flex flex-col border-l-2 border-[#00ff41] pl-2 py-1">
+                        <span className="text-[10px] text-gray-400 uppercase tracking-tighter mb-1">WALLET_AUTH_SECURE</span>
+                        <span className="text-white text-[11px] font-mono break-all opacity-90">
+                            {anchorWallet ? anchorWallet.publicKey.toString() : 'NO_WALLET_DETECTED'}
+                        </span>
+                    </div>
+                    <div className="col-span-2 flex items-center justify-between bg-[#00ff41]/5 p-2 border border-[#00ff41]/20">
+                        <span className="text-[10px] text-gray-400 font-bold uppercase">TREASURE_STATUS:</span>
+                        <span className={`text-xs font-black px-2 py-0.5 rounded-sm ${gameState?.canClaim ? "bg-yellow-500 text-black blink" : "bg-gray-800 text-gray-500"}`}>
+                            {gameState?.canClaim ? '★ AVAILABLE' : 'LOCKED'}
+                        </span>
+                    </div>
                 </div>
+
+                {balance < 0.5 && (
+                    <button
+                        onClick={requestAirdrop}
+                        disabled={loading === "airdrop"}
+                        className="w-full mt-3 border border-yellow-500 text-yellow-500 text-xs py-1 hover:bg-yellow-500 hover:text-black transition-colors uppercase"
+                    >
+                        {loading === "airdrop" ? "REQUESTING..." : "⚠️ LOW BAL: REQUEST 1 SOL AIRDROP"}
+                    </button>
+                )}
                 <div className="text-[10px] text-gray-400 mt-2 text-right flex justify-end items-center gap-2">
                     <span className="flex items-center gap-1 text-[#00ff41] animate-pulse">
                         <span className="w-2 h-2 rounded-full bg-[#00ff41]"></span>
@@ -743,10 +765,10 @@ export default function GameInterface() {
                 >
                     ⚠️ FORCE_CLIENT_REBUILD (CLEAR_CACHE)
                 </button>
-            </div>
+            </div >
 
             {/* Inventory Panel */}
-            <div className="w-full max-w-md border border-gray-800 p-4 mb-6 bg-gray-900/50 relative z-10">
+            < div className="w-full max-w-md border border-gray-800 p-4 mb-6 bg-gray-900/50 relative z-10" >
                 <h3 className="text-xs text-gray-500 mb-2 uppercase tracking-wide">:: EQUIPMENT_SLOT (METAPLEX) ::</h3>
                 <div className="flex items-center justify-between gap-3">
                     <div className="flex items-center gap-3">
@@ -772,10 +794,10 @@ export default function GameInterface() {
                         </button>
                     )}
                 </div>
-            </div>
+            </div >
 
             {/* Actions - PSG1 Large Buttons */}
-            <div className="grid grid-cols-1 gap-4 w-full max-w-md mb-6 relative z-10">
+            < div className="grid grid-cols-1 gap-4 w-full max-w-md mb-6 relative z-10" >
                 <button
                     onClick={initPlayer}
                     disabled={loading === "init"}
@@ -807,30 +829,32 @@ export default function GameInterface() {
                 >
                     {loading === "claim" ? "SWAPPING_REWARD..." : `4. CLAIM_LOOT ${gameState?.canClaim ? "($)" : "[LOCKED]"}`}
                 </button>
-            </div>
+            </div >
 
             {/* Log Panel */}
-            <div className="w-full max-w-md h-48 border-2 border-[#00ff41] p-3 overflow-y-auto font-mono text-xs bg-black/90 shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] relative z-10 custom-scrollbar">
+            < div className="w-full max-w-md h-48 border-2 border-[#00ff41] p-3 overflow-y-auto font-mono text-xs bg-black/90 shadow-[inset_0_0_20px_rgba(0,0,0,0.8)] relative z-10 custom-scrollbar" >
                 <div className="border-b border-gray-800 mb-2 pb-1 text-gray-500 uppercase tracking-wider text-[10px]">:: SYSTEM_LOGS ::</div>
                 {logs.length === 0 && <div className="text-gray-700 blink">_ WAITING_FOR_INPUT...</div>}
-                {logs.map((l, i) => (
-                    <div key={i} className="mb-1 text-[#00ff41] font-bold text-shadow flex">
-                        <span className="mr-2 opacity-50">{">"}</span>
-                        <span>{l}</span>
-                    </div>
-                ))}
+                {
+                    logs.map((l, i) => (
+                        <div key={i} className="mb-1 text-[#00ff41] font-bold text-shadow flex">
+                            <span className="mr-2 opacity-50">{">"}</span>
+                            <span>{l}</span>
+                        </div>
+                    ))
+                }
                 <div ref={(el) => { if (el) el.scrollIntoView({ behavior: "smooth" }); }} />
-            </div>
+            </div >
 
             {/* Real-time Diagnostics */}
-            <div className="mt-4 w-full max-w-md opacity-70 hover:opacity-100 transition-opacity">
+            < div className="mt-4 w-full max-w-md opacity-70 hover:opacity-100 transition-opacity" >
                 <DiagnosticPanel />
-            </div>
+            </div >
 
             {/* Transaction History */}
-            <div className="mt-4 w-full max-w-md">
+            < div className="mt-4 w-full max-w-md" >
                 <TransactionHistoryPanel />
-            </div>
-        </div>
+            </div >
+        </div >
     );
 }

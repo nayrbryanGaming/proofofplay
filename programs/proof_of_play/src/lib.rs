@@ -1,7 +1,7 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::keccak::hashv;
 
-declare_id!("3q31CJ8wMEDVjtfgZXnyEskzZ17yCmTj2p7MKkSKqiEJ"); // Default Devnet ID, change after deploy
+declare_id!("hirTPHnA6on8w2ATUku2bKJST2wqhdY5CdWt8SS7d93"); // ACTIVE PROGRAM ID
 
 #[program]
 pub mod proof_of_play {
